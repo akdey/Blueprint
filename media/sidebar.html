@@ -1162,12 +1162,22 @@
                 <textarea id="s-desc" style="min-height:90px"
                     placeholder="Describe your app — problem it solves, who uses it, core features. More detail = better specs."></textarea>
             </div>
-            <div class="file-row">
-                <button class="btn btn-secondary btn-sm" onclick="browseFile()">📄 Import file</button>
+            <div class="field-row">
+                <button class="btn btn-secondary btn-sm" onclick="browseFile('requirements')">📄 Import file</button>
                 <span id="file-tag" class="file-tag" style="display:none"></span>
             </div>
 
-            <div class="field" style="margin-top:4px">
+            <div class="sec" style="margin-top:10px">✨ Custom Standards (Optional)</div>
+            <div class="field">
+                <textarea id="s-standards" style="min-height:70px"
+                    placeholder="E.g. Use Clean Architecture, specific folder names, naming conventions, or libraries..."></textarea>
+            </div>
+            <div class="file-row">
+                <button class="btn btn-secondary btn-sm" onclick="browseFile('standards')">📄 Import Standards</button>
+                <span id="standards-file-tag" class="file-tag" style="display:none"></span>
+            </div>
+
+            <div class="field" style="margin-top:6px">
                 <label>Build Level</label>
                 <div class="level-picker" id="level-picker">
                     <button class="level-btn active" data-level="prototype" onclick="setLevel('prototype')">⚡
@@ -1314,7 +1324,8 @@
             switch (m.type) {
                 case 'init': onInit(m); break;
                 case 'stateUpdate': onStateUpdate(m.state); break;
-                case 'fileContent': onFile(m.content, m.filename); break;
+                case 'fileContent': onFile(m.content, m.filename, m.target); break;
+                case 'fileLoaded': onFile(m.content, m.filename, m.target); break;
                 case 'techStackLoading': showTsOverlay(true); break;
                 case 'techStackQuestions': onTsQuestions(m.questions); break;
                 case 'techStackDismissed': hideTsOverlay(); break;
@@ -1377,10 +1388,15 @@
             document.getElementById('s-url-row').style.display = this.value.trim() ? 'flex' : 'none';
         });
 
-        function browseFile() { vscode.postMessage({ type: 'browseFile' }); }
-        function onFile(content, filename) {
-            document.getElementById('s-desc').value = content;
-            const tag = document.getElementById('file-tag'); tag.style.display = 'inline'; tag.textContent = filename;
+        function browseFile(target = 'requirements') { vscode.postMessage({ type: 'browseFile', target }); }
+        function onFile(content, filename, target) {
+            const targetId = target === 'standards' ? 's-standards' : 's-desc';
+            const tagId = target === 'standards' ? 'standards-file-tag' : 'file-tag';
+            const area = document.getElementById(targetId);
+            area.value = (area.value ? area.value + '\n\n' : '') + content;
+            const tag = document.getElementById(tagId);
+            tag.style.display = 'inline';
+            tag.textContent = filename;
             toast(`Loaded: ${filename}`, 'success');
         }
 
@@ -1412,6 +1428,7 @@
                 clientName: document.getElementById('s-client').value.trim(),
                 clientWebsiteUrl: document.getElementById('s-client-url').value.trim(),
                 industry: document.getElementById('s-industry').value,
+                customStandards: document.getElementById('s-standards').value.trim(),
             });
         }
 

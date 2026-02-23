@@ -33,6 +33,7 @@ export interface ProjectState {
     clientWebsiteUrl?: string;
     industry?: string;
     clientBranding?: string;
+    customStandards?: string;          // User-defined coding standards/patterns
     techStack?: TechStackQuestion[];
     currentPhase: number;
     phases: PhaseState[];
@@ -85,7 +86,8 @@ export class ProjectStateManager {
         projectLevel: ProjectLevel,
         clientName?: string,
         clientWebsiteUrl?: string,
-        industry?: string
+        industry?: string,
+        customStandards?: string
     ): Promise<ProjectState> {
         const phases: PhaseState[] = PHASE_DEFINITIONS.map(def => ({
             id: def.id, name: def.name,
@@ -96,6 +98,7 @@ export class ProjectStateManager {
             projectName, projectDescription,
             projectLevel,
             clientName, clientWebsiteUrl, industry,
+            customStandards,
             currentPhase: 1, phases,
             createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
         };
@@ -194,6 +197,12 @@ export class ProjectStateManager {
                 ctx += `\n### Brand Context (from ${this.state.clientWebsiteUrl || 'website'})\n${this.state.clientBranding}\n`;
             }
             ctx += '\n';
+        }
+
+        if (this.state.customStandards) {
+            ctx += `## User-Defined Standards & Guidelines\n`;
+            ctx += `> STRIKE DIRECTIVE: Follow these custom standards and folder structures exactly as specified below.\n\n`;
+            ctx += `${this.state.customStandards}\n\n`;
         }
 
         if (this.state.techStack?.length) {

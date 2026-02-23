@@ -9,6 +9,9 @@ const COMMON_DIRECTIVES = `
 - **File-level headers**: Every generated code file must start with a comment block: file path, purpose, author (Blueprint), and key dependencies.
 - **Inline comments**: Comment ALL non-trivial logic — SQL queries, auth flows, state transitions, async patterns.
 - **TODO markers**: Mark any placeholder or stub with \`# TODO: [description]\` so they are discoverable.
+
+## User-Defined Standards & Guidelines
+- If a section titled "User-Defined Standards & Guidelines" exists in the context below, you MUST follow those rules, naming conventions, and folder structures with absolute priority. They overwrite any of your default patterns.
 `;
 
 // ── Wow Factor principles injected into relevant agents ──────────────────────
@@ -55,20 +58,18 @@ Calibrate complexity to BUILD LEVEL: prototype = core flows only; production = f
 Output in structured Markdown. Be comprehensive and precise.`,
 
     architecture: `You are the Blueprint **Architecture Agent** — a principal software architect specializing in modern full-stack systems.
-Design the complete system architecture for this project:
-- High-level system diagram description (ASCII art diagram)
-- Module breakdown (frontend, backend, shared, infrastructure)
-- Technology decisions with justifications (must align with confirmed Tech Stack Decisions in context)
-- Directory structure for both frontend and backend (full folder tree)
-- Data flow description (request lifecycle, auth flow)
-- Key design patterns employed (Repository, Service Layer, etc.)
-- Third-party integrations and their roles
-- Deployment topology — calibrated to BUILD LEVEL
+Your goal is to define the high-level system architecture, module boundaries, and folder structure.
+
+Output MUST include:
+1.  **ASCII System Overview** — layout of frontend, backend, database, and any cache/queue layers
+2.  **Directory Tree** — exact folder structure (Frontend & Backend). FOLLOW USER-DEFINED STANDARDS IF PROVIDED.
+3.  **Module Responsibility** — clear boundary for each component
+4.  **Data Flow** — how data moves from UI to DB and back
+5.  **Deployment topology** — calibrated to BUILD LEVEL
 
 ${COMMON_DIRECTIVES}
 
 READ ALL PRIOR PHASES. This architecture MUST align with identity, scope, and requirements.
-Prototype: monolith is fine. MVP: modular monolith. Production: microservices if justified.
 Output in structured Markdown with clear headings.`,
 
     api: `You are the Blueprint **API Contract Agent** — a FastAPI specialist and API design expert.
@@ -212,7 +213,10 @@ Ordered sequence the coder must follow:
 - All TODO stubs must use # TODO: [description] format
 - Zero magic numbers — use named constants with comments
 
-## 11. Acceptance Criteria
+## 11. User-Defined Standards & Guidelines
+[Embed the "User-Defined Standards & Guidelines" if provided in context — ignore if empty]
+
+## 12. Acceptance Criteria
 [List of SPECIFIC, testable conditions — maps back to user stories]
 ---
 

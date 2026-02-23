@@ -9,7 +9,7 @@
 [![VS Code](https://img.shields.io/badge/VS%20Code-1.85+-blue?logo=visual-studio-code)](https://code.visualstudio.com/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178c6?logo=typescript)](https://www.typescriptlang.org/)
 [![LLM Providers](https://img.shields.io/badge/LLM-Gemini%20%7C%20OpenAI%20%7C%20Groq%20%7C%20Azure-orange)](https://openai.com)
-[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![License](https://img.shields.io/badge/license-Proprietary-red)](LICENSE)
 
 </div>
 
@@ -57,6 +57,22 @@ The result: a `08_handoff.md` file that contains **the complete blueprint of you
 
 ---
 
+## 🏆 Flagship Features (The Game Changers)
+
+### 🏗️ Bring Your Own DNA (Standards & Patterns)
+Blueprint is the first orchestrator that lets you enforce **your** engineering DNA.
+- **Upload your `STANDARDS.md`**: Paste or import your team's specific naming conventions, folder structures (e.g., Clean Architecture vs. Hexagonal), and coding patterns.
+- **Strike Directive**: Every agent is given a **high-priority instruction** to prioritize your custom guidelines over its default suggestions.
+- **Architecture on Your Terms**: The Architecture agent builds the tree you want; the API agent uses your preferred patterns.
+
+### 🎨 Tech Stack Wizard (Zero Noise)
+Generic generators ask too much. Blueprint's wizard is **context-aware** and **level-calibrated**:
+- **Automatic Multi-Factor Analysis**: After Phase 2 (Scope), Blueprint analyzes your specific app idea to curate a perfect questionnaire.
+- **Build-Level Filtering**: If you're building a "Prototype," the wizard automatically suppresses enterprise complexity like CI/CD, Kubernetes, and Observability.
+- **Intelligent Recommendations**: Every choice includes a **justification** based on your app type and build level.
+
+---
+
 ## 💡 Key Features
 
 ### 🎯 Build Level — Not One-Size-Fits-All
@@ -66,19 +82,17 @@ Set your ambition on the setup screen. Everything adapts automatically:
 - **🚀 MVP**: PostgreSQL, JWT, modular — production-like without the overhead.
 - **🏭 Production**: Full security, observability, scalability, CI/CD directives.
 
+### ✨ Wow Factor Built-In
+The Design phase (Phase 7) is uniquely structured to produce a **"✨ Wow Factor"** section:
+- **Micro-interactions**: 3-5 signature animations (spring physics, skeleton shimmers).
+- **Unexpected Delight**: One "surplus" feature (AI-generated hover summaries, confetti on milestones).
+- **Premium UX**: Glassmorphism, smooth transitions, and high-quality empty states as first-class citizens.
+
 ### 🧠 Cumulative Context = No Contradictions
 Every agent receives the **approved, edited output** of every previous phase. The Database agent knows your API contract. The Design agent references your brand colors. The Handoff agent embeds *all of it* inline.
 
 ### ✏️ Edit Before Committing
 Every generated artifact appears in an **editable textarea** in the sidebar. Change a user story, edit a field name, rewrite a section — those changes propagate to every subsequent agent automatically.
-
-### 🎨 Tech Stack Wizard (Context-Aware)
-After approving your Scope document, a slide-up overlay asks 4-6 tech stack questions — tailored to your project type and build level. No version control questions. No deployment questions. Just: *what are you building with?*
-
-> "Best for a prototype: SQLite with aiosqlite — zero config, migrate to Postgres later"
-
-### ✨ Wow Factor Built-In
-The Design phase explicitly produces a **"✨ Wow Factor"** section: signature micro-interactions, delight features, branded empty states, and loading experiences. Because *good* software is also *delightful* software.
 
 ### 💬 Code Comments Mandate
 Every agent is instructed to produce code with:
@@ -90,29 +104,23 @@ Every agent is instructed to produce code with:
 The handoff brief doesn't just tell someone *what* to build — it tells them *why* every decision was made.
 
 ### 🔌 4 LLM Providers — Your Key, Your Choice
-No subscription. No middleman. Bring your own API key:
+No subscription. No middleman. Bring your own API key. Supports **Google Gemini** (2.0 Flash/1.5 Pro), **OpenAI**, **Groq** (fastest), and **Azure OpenAI**.
 
-| Provider | Models |
-|----------|--------|
-| **Google Gemini** | gemini-2.0-flash, gemini-1.5-pro |
-| **OpenAI** | gpt-4o, gpt-4-turbo, gpt-3.5-turbo |
-| **Groq** | llama-3.3-70b (ultra-fast, free tier available) |
-| **Azure OpenAI** | Any deployed model on your Azure resource |
+---
 
-### 📁 Artifacts Saved to Your Workspace
+## 📁 Artifacts Saved to Your Workspace
 Every phase writes a `.md` file to `.blueprint/` in your workspace:
 ```
 .blueprint/
 ├── 01_identity.md
-├── 02_scope.md
+├── 02_scope.md    (Tech Stack Wizard triggers after this)
 ├── 03_skeleton.md
 ├── 04_contract.md
 ├── 05_testing.md
 ├── 06_data.md
-├── 07_design.md
-└── 08_handoff.md    ← The crown jewel
+├── 07_design.md   (Wow Factor injected here)
+└── 08_handoff.md    (The 1-Step Build Prompt)
 ```
-Commit them. Share them. Use them as a project wiki.
 
 ---
 
@@ -130,24 +138,16 @@ Open VS Code Settings → search **"Blueprint"** → enter your API key for your
 ### 3. Open a workspace folder
 Blueprint saves artifacts to your current workspace. Open any folder first.
 
-### 4. Click the Blueprint icon in the Activity Bar
-The sidebar opens. Fill in:
-- **Project name** — e.g., "FinTrack"
-- **Client/Brand** *(optional)* — auto-scrapes colors and fonts from their website
-- **Industry** — calibrates agent personas
-- **Requirements** — paste your brief, import a `.txt`/`.md` file, or just describe it
-- **Build Level** — Prototype / MVP / Production
+### 4. Setup your Project
+- **Requirements**: Describe your app or import a spec file.
+- **✨ Custom Standards**: Paste your team's coding guidelines or import a `STANDARDS.md` file.
+- **Build Level**: Choose **Prototype** (speed), **MVP** (balance), or **Production** (enterprise).
 
-### 5. Run phases, review, approve
-Click **▷ Run** on Phase 1. Review the output. Edit anything you want. Click **✓ Approve → Scope** to move to Phase 2.
-
-After Phase 2 (Scope) is approved, the **Tech Stack wizard** slides up automatically.
+### 5. Run & Refine
+Run phases 1-8. Review, edit, and approve each step. The **Tech Stack Wizard** will help you lock in your tools after Phase 2.
 
 ### 6. Invoke Handoff
-After Phase 8, click **🚀 Invoke Handoff**. Blueprint will:
-1. Copy the full brief to your clipboard
-2. Attach `.blueprint/08_handoff.md` as a file context in your AI chat
-3. You're ready to build
+After Phase 8, click **🚀 Invoke Handoff**. Blueprint gives you the ultimate **Master Prompt** to paste into any AI coder (Antigravity, Copilot, etc.) to build your app in one shot.
 
 ---
 
@@ -201,7 +201,7 @@ npm run compile
 
 ## 📄 License
 
-MIT © 2024 Blueprint Contributors
+© 2024 Amit Dey. All Rights Reserved. Proprietary software.
 
 ---
 

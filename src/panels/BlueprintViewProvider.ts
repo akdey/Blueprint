@@ -48,7 +48,7 @@ export class BlueprintViewProvider implements vscode.WebviewViewProvider {
         switch (m.type) {
             case 'ready': await this._sendInit(); break;
             case 'openSettings': vscode.commands.executeCommand('workbench.action.openSettings', 'blueprint'); break;
-            case 'browseFile': await this._handleBrowseFile(); break;
+            case 'browseFile': await this._handleBrowseFile(m.target); break;
             case 'initProject': await this._handleInitProject(m); break;
             case 'confirmTechStack': await this._handleConfirmTechStack(m); break;
             case 'skipTechStack': this._post({ type: 'techStackDismissed' }); break;
@@ -125,7 +125,8 @@ export class BlueprintViewProvider implements vscode.WebviewViewProvider {
                 m.projectLevel || 'prototype',
                 m.clientName,
                 m.clientWebsiteUrl,
-                m.industry
+                m.industry,
+                m.customStandards
             );
             this._orchestrator = new AgentOrchestrator(createLLMClient(cfg), this._stateManager);
             this._post({ type: 'stateUpdate', state: this._stateManager.getState() });
@@ -196,15 +197,21 @@ export class BlueprintViewProvider implements vscode.WebviewViewProvider {
 
     // ── File browse ──────────────────────────────────────────────────────────────
 
-    private async _handleBrowseFile(): Promise<void> {
+    private async _handleBrowseFile(target: string): Promise<void> {
         const uris = await vscode.window.showOpenDialog({
-            canSelectMany: false, openLabel: 'Import Requirements',
-            filters: { 'Documents': ['txt', 'md', 'pdf'], 'All Files': ['*'] },
+            canSelectMany: false,
+            openLabel: target === 'standards' ? 'Import Standards' : 'Import Requirements',
+            filters: { 'Documents': ['txt', 'md'], 'All Files': ['*'] },
         });
         if (!uris?.length) return;
         try {
             const content = fs.readFileSync(uris[0].fsPath, 'utf-8');
-            this._post({ type: 'fileContent', content, filename: path.basename(uris[0].fsPath) });
+            this._post({
+                type: 'fileLoaded',
+                content,
+                filename: path.basename(uris[0].fsPath),
+                target: target
+            });
         } catch (e) {
             this._post({ type: 'toast', text: `Could not read file: ${e}`, variant: 'error' });
         }
@@ -362,16 +369,16 @@ export class BlueprintViewProvider implements vscode.WebviewViewProvider {
     private async _handleInvokeHandoff(): Promise<void> {
         const state = this._stateManager.getState();
         if (!state) return;
-        const handoff = state.phases.find(p => p.id === 10);
+        const handoff = state.phases.find(p => p.id === 8);
         const content = handoff?.editedArtifact || handoff?.artifact || '';
-        if (!content) { vscode.window.showErrorMessage('Complete Phase 10 first.'); return; }
+        if (!content) { vscode.window.showErrorMessage('Complete Phase 8 first.'); return; }
 
         // 1. Always copy to clipboard
         await vscode.env.clipboard.writeText(content);
 
         // 2. Get the saved artifact .md file URI
         const folders = vscode.workspace.workspaceFolders;
-        const def = PHASE_DEFINITIONS.find(d => d.id === 10);
+        const def = PHASE_DEFINITIONS.find(d => d.id === 8);
         const artifactUri = folders?.length && def
             ? vscode.Uri.file(path.join(folders[0].uri.fsPath, '.blueprint', def.artifactFile))
             : null;
