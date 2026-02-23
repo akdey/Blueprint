@@ -15,6 +15,26 @@
 
 ---
 
+## 🚀 Instant Install
+
+**Get Blueprint running in 30 seconds:**
+
+1.  **Download the Extension**: [**Click here to download `blueprint-0.1.0.vsix`**](https://github.com/akdey/Blueprint/raw/main/blueprint-0.1.0.vsix)
+2.  **Install in VS Code**: Open VS Code → Extensions (`Ctrl+Shift+X`) → Click the `...` in the top right → **Install from VSIX...** → Select the downloaded file.
+3.  **Activate**: Click the ⬟ icon in your Activity Bar.
+
+---
+
+## 📋 Prerequisites
+
+Before you start, ensure you have:
+- **VS Code 1.85+**
+- **An Open Workspace**: Blueprint needs a folder to save your `.blueprint/` artifacts.
+- **An LLM API Key**: You'll need a key from Gemini, OpenAI, Groq, or Azure.
+  - *Recommendation*: Use [Groq](https://console.groq.com) for near-instant (and free) generations during your first trial.
+
+---
+
 ## 🤔 The Problem
 
 Every developer has been here:
@@ -126,28 +146,19 @@ Every phase writes a `.md` file to `.blueprint/` in your workspace:
 
 ## ⚡ Quick Start
 
-### 1. Install
-- Install the `.vsix` directly: **Extensions panel → `···` → Install from VSIX**
-- Or install from the VS Code Marketplace *(coming soon)*
+### 1. Configure your LLM
+Open VS Code Settings → search **"Blueprint"** → enter your API key.
 
-### 2. Configure your LLM
-Open VS Code Settings → search **"Blueprint"** → enter your API key for your preferred provider.
-
-> **Free option**: Use [Groq](https://console.groq.com) with `llama-3.3-70b-versatile` — it's fast and has a generous free tier.
-
-### 3. Open a workspace folder
-Blueprint saves artifacts to your current workspace. Open any folder first.
-
-### 4. Setup your Project
+### 2. Setup your Project
 - **Requirements**: Describe your app or import a spec file.
-- **✨ Custom Standards**: Paste your team's coding guidelines or import a `STANDARDS.md` file.
-- **Build Level**: Choose **Prototype** (speed), **MVP** (balance), or **Production** (enterprise).
+- **✨ Custom Standards**: Paste your team's coding guidelines or import a `STANDARDS.md`.
+- **Build Level**: Choose **Prototype**, **MVP**, or **Production**.
 
-### 5. Run & Refine
+### 3. Run & Refine
 Run phases 1-8. Review, edit, and approve each step. The **Tech Stack Wizard** will help you lock in your tools after Phase 2.
 
-### 6. Invoke Handoff
-After Phase 8, click **🚀 Invoke Handoff**. Blueprint gives you the ultimate **Master Prompt** to paste into any AI coder (Antigravity, Copilot, etc.) to build your app in one shot.
+### 4. Invoke Handoff
+After Phase 8, click **🚀 Invoke Handoff** and paste your ultimate **Master Prompt** into any AI coder (Antigravity, Copilot, etc.) to build your app.
 
 ---
 
@@ -178,8 +189,8 @@ Blueprint VS Code Extension
 ## 🛠️ Development
 
 ```bash
-git clone https://github.com/yourusername/blueprint
-cd blueprint
+git clone https://github.com/akdey/Blueprint
+cd Blueprint
 npm install
 npm run compile
 
