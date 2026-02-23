@@ -1,0 +1,11 @@
+node_modules/
+out/
+*.vsix
+.vscode-test/
+
+# Blueprint artifact output (user data, not source)
+.blueprint/
+
+# OS
+.DS_Store
+Thumbs.db

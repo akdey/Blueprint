@@ -1,0 +1,200 @@
+{
+  "name": "blueprint",
+  "displayName": "Blueprint: Idea to Build Brief",
+  "description": "8 specialized AI agents that transform your app idea into a complete, annotated build brief — brand identity, API contracts, database schema, TDD strategy, UI spec, and a one-shot master prompt. Supports Gemini, OpenAI, Groq, and Azure OpenAI.",
+  "version": "0.1.0",
+  "publisher": "blueprint-dev",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/akdey/Blueprint"
+  },
+  "homepage": "https://github.com/akdey/Blueprint#readme",
+  "bugs": {
+    "url": "https://github.com/akdey/Blueprint/issues"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "AI",
+    "Other"
+  ],
+  "keywords": [
+    "ai",
+    "agent",
+    "prototype",
+    "requirements",
+    "tdd",
+    "fastapi",
+    "react",
+    "llm"
+  ],
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "blueprint-sidebar",
+          "title": "Blueprint",
+          "icon": "media/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "blueprint-sidebar": [
+        {
+          "type": "webview",
+          "id": "blueprint.sidebarView",
+          "name": "Blueprint"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "blueprint.start",
+        "title": "Blueprint: Open",
+        "icon": "$(rocket)"
+      },
+      {
+        "command": "blueprint.reset",
+        "title": "Blueprint: Reset Project",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "blueprint.openSettings",
+        "title": "Blueprint: Open Settings",
+        "icon": "$(settings-gear)"
+      }
+    ],
+    "configuration": {
+      "title": "Blueprint",
+      "properties": {
+        "blueprint.provider": {
+          "type": "string",
+          "default": "gemini",
+          "enum": [
+            "gemini",
+            "openai",
+            "groq",
+            "azure-openai"
+          ],
+          "enumDescriptions": [
+            "Google Gemini (gemini-2.0-flash, gemini-1.5-pro, etc.)",
+            "OpenAI (gpt-4o, gpt-4-turbo, gpt-3.5-turbo, etc.)",
+            "Groq (llama-3.3-70b, mixtral-8x7b, etc.) — ultra-fast inference",
+            "Azure OpenAI — your deployed Azure OpenAI resource"
+          ],
+          "markdownDescription": "The LLM provider to use for all Blueprint agents.\n\nConfigure credential fields for the chosen provider below.",
+          "order": 1
+        },
+        "blueprint.gemini.apiKey": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "**Gemini API Key** — get yours at [aistudio.google.com](https://aistudio.google.com/).\n\n_Required when `blueprint.provider` is `gemini`._",
+          "order": 10
+        },
+        "blueprint.gemini.model": {
+          "type": "string",
+          "default": "gemini-2.0-flash",
+          "enum": [
+            "gemini-2.0-flash",
+            "gemini-2.0-flash-thinking-exp",
+            "gemini-1.5-pro",
+            "gemini-1.5-flash"
+          ],
+          "markdownDescription": "Gemini model to use.\n\n- `gemini-2.0-flash` — Fast, recommended for most projects\n- `gemini-2.0-flash-thinking-exp` — Slower but deeper reasoning\n- `gemini-1.5-pro` — Highest quality output",
+          "order": 11
+        },
+        "blueprint.openai.apiKey": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "**OpenAI API Key** — get yours at [platform.openai.com](https://platform.openai.com/api-keys).\n\n_Required when `blueprint.provider` is `openai`._",
+          "order": 20
+        },
+        "blueprint.openai.model": {
+          "type": "string",
+          "default": "gpt-4o",
+          "enum": [
+            "gpt-4o",
+            "gpt-4o-mini",
+            "gpt-4-turbo",
+            "gpt-4",
+            "gpt-3.5-turbo"
+          ],
+          "markdownDescription": "OpenAI model to use.\n\n- `gpt-4o` — Best quality, recommended\n- `gpt-4o-mini` — Faster and cheaper\n- `gpt-4-turbo` — Strong reasoning",
+          "order": 21
+        },
+        "blueprint.openai.baseUrl": {
+          "type": "string",
+          "default": "https://api.openai.com/v1",
+          "markdownDescription": "**OpenAI Base URL** — override for custom proxies or OpenAI-compatible endpoints. Leave as default for standard OpenAI usage.",
+          "order": 22
+        },
+        "blueprint.groq.apiKey": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "**Groq API Key** — get yours at [console.groq.com](https://console.groq.com/).\n\n_Required when `blueprint.provider` is `groq`._",
+          "order": 30
+        },
+        "blueprint.groq.model": {
+          "type": "string",
+          "default": "llama-3.3-70b-versatile",
+          "enum": [
+            "llama-3.3-70b-versatile",
+            "llama-3.1-70b-versatile",
+            "llama-3.1-8b-instant",
+            "mixtral-8x7b-32768",
+            "gemma2-9b-it"
+          ],
+          "markdownDescription": "Groq model to use.\n\n- `llama-3.3-70b-versatile` — Best quality on Groq, recommended\n- `llama-3.1-8b-instant` — Ultra-fast, lighter tasks\n- `mixtral-8x7b-32768` — Long context window",
+          "order": 31
+        },
+        "blueprint.azure.apiKey": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "**Azure OpenAI API Key** — found in your Azure Portal under your OpenAI resource → Keys and Endpoint.\n\n_Required when `blueprint.provider` is `azure-openai`._",
+          "order": 40
+        },
+        "blueprint.azure.endpoint": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "**Azure OpenAI Endpoint** — e.g. `https://my-resource.openai.azure.com`\n\nFound in Azure Portal → your OpenAI resource → Endpoint.",
+          "order": 41
+        },
+        "blueprint.azure.deploymentName": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "**Azure Deployment Name** — the name you gave your model deployment in Azure AI Studio (e.g. `gpt-4o-deployment`).",
+          "order": 42
+        },
+        "blueprint.azure.apiVersion": {
+          "type": "string",
+          "default": "2024-08-01-preview",
+          "enum": [
+            "2024-08-01-preview",
+            "2024-05-01-preview",
+            "2024-02-01",
+            "2023-12-01-preview"
+          ],
+          "markdownDescription": "**Azure OpenAI API Version** — use the latest preview version for best features.",
+          "order": 43
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint src --ext ts"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.33",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^6.x",
+    "@typescript-eslint/parser": "^6.x",
+    "eslint": "^8.x",
+    "typescript": "^5.x"
+  }
+}

@@ -1,0 +1,1645 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>Blueprint</title>
+    <style>
+        :root {
+            --bp: #7c6bfc;
+            --bp-dim: rgba(124, 107, 252, .13);
+            --bp-b: rgba(124, 107, 252, .28);
+            --bp-g: linear-gradient(135deg, #7c6bfc, #5e8bff);
+            --ok: var(--vscode-testing-iconPassed, #4ec994);
+            --err: var(--vscode-testing-iconFailed, #f14c4c);
+            --warn: var(--vscode-editorWarning-foreground, #cca700)
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        body {
+            font-family: var(--vscode-font-family);
+            font-size: var(--vscode-font-size);
+            color: var(--vscode-foreground);
+            background: var(--vscode-sideBar-background);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden
+        }
+
+        .screen {
+            display: none;
+            flex-direction: column;
+            flex: 1;
+            overflow: hidden
+        }
+
+        .screen.active {
+            display: flex
+        }
+
+        .scroll-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 9px
+        }
+
+        /* Logo */
+        .logo-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 12px;
+            border-bottom: 1px solid var(--vscode-panel-border);
+            flex-shrink: 0
+        }
+
+        .logo-mark {
+            width: 22px;
+            height: 22px;
+            border-radius: 5px;
+            background: var(--bp-g);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            color: #fff;
+            font-weight: 800
+        }
+
+        .logo-text {
+            font-size: 13px;
+            font-weight: 700
+        }
+
+        .logo-ver {
+            font-size: 10px;
+            margin-left: auto;
+            padding: 1px 6px;
+            border-radius: 10px;
+            background: var(--vscode-badge-background);
+            color: var(--vscode-badge-foreground)
+        }
+
+        /* Type */
+        .sec {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: .07em;
+            text-transform: uppercase;
+            color: var(--vscode-descriptionForeground)
+        }
+
+        .hint {
+            font-size: 10px;
+            color: var(--vscode-descriptionForeground)
+        }
+
+        .divider {
+            height: 1px;
+            background: var(--vscode-panel-border)
+        }
+
+        /* Provider */
+        .prov-card {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--vscode-editor-background);
+            border: 1px solid var(--vscode-panel-border);
+            border-radius: 5px;
+            padding: 7px 10px
+        }
+
+        .prov-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0
+        }
+
+        .prov-dot.ok {
+            background: var(--ok);
+            box-shadow: 0 0 5px var(--ok)
+        }
+
+        .prov-dot.no {
+            background: var(--warn)
+        }
+
+        .prov-info {
+            flex: 1;
+            min-width: 0
+        }
+
+        .prov-name {
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis
+        }
+
+        .prov-model {
+            font-size: 10px;
+            color: var(--vscode-descriptionForeground);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis
+        }
+
+        .prov-badge {
+            font-size: 10px;
+            padding: 1px 7px;
+            border-radius: 10px;
+            font-weight: 600;
+            border: 1px solid;
+            flex-shrink: 0
+        }
+
+        .prov-badge.ok {
+            background: rgba(78, 201, 148, .1);
+            color: var(--ok);
+            border-color: rgba(78, 201, 148, .25)
+        }
+
+        .prov-badge.no {
+            background: rgba(204, 167, 0, .1);
+            color: var(--warn);
+            border-color: rgba(204, 167, 0, .25)
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            font-family: var(--vscode-font-family);
+            font-size: 12px;
+            font-weight: 500;
+            border-radius: 3px;
+            cursor: pointer;
+            padding: 5px 10px;
+            transition: background .1s, opacity .1s;
+            white-space: nowrap;
+            border: none;
+            outline: none
+        }
+
+        .btn-secondary {
+            background: var(--vscode-button-secondaryBackground, var(--vscode-editor-background));
+            color: var(--vscode-button-secondaryForeground, var(--vscode-foreground));
+            border: 1px solid var(--vscode-panel-border)
+        }
+
+        .btn-secondary:hover {
+            background: var(--vscode-button-secondaryHoverBackground, var(--vscode-list-hoverBackground))
+        }
+
+        .btn-bp {
+            background: var(--bp-g);
+            color: #fff;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(124, 107, 252, .25)
+        }
+
+        .btn-bp:hover {
+            opacity: .9
+        }
+
+        .btn-bp:disabled {
+            opacity: .4;
+            cursor: not-allowed
+        }
+
+        .btn-link {
+            background: none;
+            border: none;
+            color: var(--vscode-textLink-foreground);
+            font-size: 11px;
+            padding: 0;
+            cursor: pointer;
+            font-family: inherit
+        }
+
+        .btn-link:hover {
+            text-decoration: underline
+        }
+
+        .btn-full {
+            width: 100%
+        }
+
+        .btn-sm {
+            padding: 3px 8px;
+            font-size: 11px
+        }
+
+        .btn-icon {
+            width: 20px;
+            height: 20px;
+            padding: 0;
+            border-radius: 3px;
+            background: transparent;
+            color: var(--vscode-icon-foreground);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center
+        }
+
+        .btn-icon:hover {
+            background: var(--vscode-toolbar-hoverBackground)
+        }
+
+        /* Fields */
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 4px
+        }
+
+        .field label {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+            color: var(--vscode-descriptionForeground)
+        }
+
+        .field input,
+        .field textarea,
+        .field select {
+            background: var(--vscode-input-background);
+            border: 1px solid var(--vscode-input-border, var(--vscode-panel-border));
+            border-radius: 3px;
+            color: var(--vscode-input-foreground);
+            font-family: var(--vscode-font-family);
+            font-size: 12px;
+            padding: 5px 8px;
+            outline: none;
+            width: 100%
+        }
+
+        .field input:focus,
+        .field textarea:focus,
+        .field select:focus {
+            border-color: var(--vscode-focusBorder, var(--bp));
+            box-shadow: 0 0 0 1px var(--vscode-focusBorder, var(--bp))
+        }
+
+        .field textarea {
+            min-height: 80px;
+            resize: vertical;
+            line-height: 1.5
+        }
+
+        .field-row {
+            display: flex;
+            gap: 6px
+        }
+
+        .field-row .field {
+            flex: 1
+        }
+
+        .file-row {
+            display: flex;
+            gap: 6px;
+            align-items: center
+        }
+
+        .level-picker {
+            display: flex;
+            gap: 4px;
+            margin-top: 5px
+        }
+
+        .level-btn {
+            flex: 1;
+            padding: 5px 4px;
+            font-size: 10px;
+            border: 1px solid var(--vscode-widget-border, #444);
+            border-radius: 4px;
+            background: transparent;
+            color: var(--vscode-foreground);
+            cursor: pointer;
+            transition: background .15s, border-color .15s
+        }
+
+        .level-btn:hover {
+            border-color: var(--bp);
+            background: var(--bp-dim)
+        }
+
+        .level-btn.active {
+            background: var(--bp-dim);
+            border-color: var(--bp);
+            color: var(--bp);
+            font-weight: 600
+        }
+
+
+        .file-tag {
+            font-size: 10px;
+            background: var(--bp-dim);
+            border: 1px solid var(--bp-b);
+            border-radius: 3px;
+            padding: 2px 7px;
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap
+        }
+
+        .warn-card {
+            display: flex;
+            align-items: flex-start;
+            gap: 7px;
+            background: rgba(204, 167, 0, .07);
+            border: 1px solid rgba(204, 167, 0, .22);
+            border-radius: 4px;
+            padding: 8px 10px;
+            font-size: 11px
+        }
+
+        .checklist {
+            display: flex;
+            flex-direction: column;
+            gap: 1px
+        }
+
+        .check-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 2px 0;
+            font-size: 11px;
+            color: var(--vscode-descriptionForeground)
+        }
+
+        /* Spinner */
+        .spin-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            padding: 20px 12px;
+            text-align: center
+        }
+
+        .spinner {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            border: 2.5px solid var(--vscode-panel-border);
+            border-top-color: var(--bp);
+            animation: spin .7s linear infinite
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg)
+            }
+        }
+
+        .spin-label {
+            font-size: 12px;
+            font-weight: 500
+        }
+
+        .spin-sub {
+            font-size: 10px;
+            color: var(--vscode-descriptionForeground)
+        }
+
+        .dots span {
+            display: inline-block;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: var(--bp);
+            margin: 0 2px;
+            animation: db 1.2s ease infinite
+        }
+
+        .dots span:nth-child(2) {
+            animation-delay: .2s
+        }
+
+        .dots span:nth-child(3) {
+            animation-delay: .4s
+        }
+
+        @keyframes db {
+
+            0%,
+            80%,
+            100% {
+                transform: translateY(0);
+                opacity: .3
+            }
+
+            40% {
+                transform: translateY(-4px);
+                opacity: 1
+            }
+        }
+
+        /* Tech stack overlay */
+        .ts-overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 100;
+            background: rgba(0, 0, 0, .45);
+            display: flex;
+            align-items: flex-end
+        }
+
+        .ts-panel {
+            background: var(--vscode-sideBar-background);
+            border-top: 2px solid var(--bp);
+            width: 100%;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            animation: slideup .25s ease
+        }
+
+        @keyframes slideup {
+            from {
+                transform: translateY(100%)
+            }
+
+            to {
+                transform: translateY(0)
+            }
+        }
+
+        .ts-hdr {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--vscode-panel-border);
+            flex-shrink: 0
+        }
+
+        .ts-hdr-icon {
+            font-size: 16px
+        }
+
+        .ts-hdr-title {
+            font-size: 13px;
+            font-weight: 700;
+            flex: 1
+        }
+
+        .ts-hdr-sub {
+            font-size: 10px;
+            color: var(--var(--vscode-descriptionForeground))
+        }
+
+        .ts-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px
+        }
+
+        .ts-footer {
+            display: flex;
+            gap: 6px;
+            padding: 8px 12px;
+            border-top: 1px solid var(--vscode-panel-border);
+            flex-shrink: 0
+        }
+
+        .ts-q {
+            background: var(--vscode-editor-background);
+            border: 1px solid var(--vscode-panel-border);
+            border-radius: 4px;
+            padding: 10px
+        }
+
+        .ts-q-title {
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 2px
+        }
+
+        .ts-q-desc {
+            font-size: 10px;
+            color: var(--vscode-descriptionForeground);
+            margin-bottom: 7px
+        }
+
+        .ts-opts {
+            display: flex;
+            flex-direction: column;
+            gap: 3px
+        }
+
+        .ts-opt {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            padding: 5px 8px;
+            border-radius: 3px;
+            border: 1px solid var(--vscode-panel-border);
+            cursor: pointer;
+            transition: background .1s;
+            background: var(--vscode-sideBar-background);
+            font-size: 12px
+        }
+
+        .ts-opt:hover {
+            background: var(--vscode-list-hoverBackground)
+        }
+
+        .ts-opt.sel {
+            background: var(--bp-dim);
+            border-color: var(--bp-b)
+        }
+
+        .ts-opt input[type=radio] {
+            accent-color: var(--bp);
+            flex-shrink: 0
+        }
+
+        .ts-rec {
+            font-size: 9px;
+            padding: 1px 5px;
+            border-radius: 8px;
+            background: var(--bp-dim);
+            color: var(--bp);
+            border: 1px solid var(--bp-b);
+            margin-left: auto;
+            flex-shrink: 0
+        }
+
+        .ts-reason {
+            font-size: 10px;
+            color: var(--vscode-descriptionForeground);
+            margin-top: 4px;
+            font-style: italic
+        }
+
+        /* Main layout */
+        .proj-hdr {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            padding: 6px 12px;
+            border-bottom: 1px solid var(--vscode-panel-border);
+            flex-shrink: 0
+        }
+
+        .proj-hdr-icon {
+            width: 18px;
+            height: 18px;
+            border-radius: 4px;
+            background: var(--bp-g);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: #fff;
+            flex-shrink: 0
+        }
+
+        .proj-hdr-name {
+            font-size: 12px;
+            font-weight: 600;
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis
+        }
+
+        .proj-hdr-acts {
+            display: flex;
+            gap: 2px
+        }
+
+        .prog-wrap {
+            padding: 4px 12px 3px;
+            flex-shrink: 0
+        }
+
+        .prog-bar {
+            height: 2px;
+            background: var(--vscode-panel-border);
+            border-radius: 2px;
+            overflow: hidden
+        }
+
+        .prog-fill {
+            height: 100%;
+            background: var(--bp-g);
+            border-radius: 2px;
+            transition: width .4s ease
+        }
+
+        .prog-lbl {
+            font-size: 10px;
+            color: var(--vscode-descriptionForeground);
+            text-align: right;
+            margin-top: 2px
+        }
+
+        .phase-tree {
+            flex: 0 0 auto;
+            max-height: 34vh;
+            overflow-y: auto;
+            border-bottom: 1px solid var(--vscode-panel-border)
+        }
+
+        .ph-item {
+            display: flex;
+            align-items: center;
+            padding: 3px 12px 3px 8px;
+            cursor: pointer;
+            transition: background .08s
+        }
+
+        .ph-item:hover {
+            background: var(--vscode-list-hoverBackground)
+        }
+
+        .ph-item.sel {
+            background: var(--vscode-list-activeSelectionBackground);
+            color: var(--vscode-list-activeSelectionForeground)
+        }
+
+        .ph-item.sel .ph-name,
+        .ph-item.sel .ph-sub {
+            color: inherit;
+            opacity: 1
+        }
+
+        .ph-ind {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            font-weight: 700;
+            margin-right: 7px
+        }
+
+        .ph-item.pending .ph-ind {
+            background: var(--vscode-editor-background);
+            border: 1.5px solid var(--vscode-panel-border);
+            color: var(--vscode-descriptionForeground)
+        }
+
+        .ph-item.current .ph-ind {
+            background: var(--bp-dim);
+            border: 1.5px solid var(--bp);
+            color: var(--bp);
+            box-shadow: 0 0 6px var(--bp-b)
+        }
+
+        .ph-item.completed .ph-ind {
+            background: rgba(78, 201, 148, .14);
+            border: 1.5px solid var(--ok);
+            color: var(--ok)
+        }
+
+        .ph-item.error .ph-ind {
+            background: rgba(241, 76, 76, .1);
+            border: 1.5px solid var(--err);
+            color: var(--err)
+        }
+
+        .ph-txt {
+            flex: 1;
+            min-width: 0
+        }
+
+        .ph-name {
+            font-size: 12px;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis
+        }
+
+        .ph-item.pending .ph-name {
+            color: var(--vscode-disabledForeground, var(--vscode-descriptionForeground))
+        }
+
+        .ph-sub {
+            font-size: 10px;
+            color: var(--vscode-descriptionForeground);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis
+        }
+
+        .content-panel {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 9px
+        }
+
+        /* Phase detail */
+        .ph-hdr {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            padding-bottom: 9px;
+            border-bottom: 1px solid var(--vscode-panel-border)
+        }
+
+        .ph-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            background: var(--bp-dim);
+            border: 1px solid var(--bp-b)
+        }
+
+        .ph-meta {
+            flex: 1
+        }
+
+        .ph-num {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            color: var(--bp)
+        }
+
+        .ph-title {
+            font-size: 13px;
+            font-weight: 700
+        }
+
+        .ph-desc {
+            font-size: 10px;
+            color: var(--vscode-descriptionForeground)
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            border-radius: 10px;
+            padding: 2px 7px;
+            font-size: 10px;
+            font-weight: 600;
+            flex-shrink: 0;
+            border: 1px solid
+        }
+
+        .status-pill.pending {
+            background: var(--vscode-editor-background);
+            border-color: var(--vscode-panel-border);
+            color: var(--vscode-descriptionForeground)
+        }
+
+        .status-pill.current {
+            background: var(--bp-dim);
+            border-color: var(--bp-b);
+            color: var(--bp)
+        }
+
+        .status-pill.completed {
+            background: rgba(78, 201, 148, .12);
+            border-color: rgba(78, 201, 148, .3);
+            color: var(--ok)
+        }
+
+        .status-pill.error {
+            background: rgba(241, 76, 76, .1);
+            border-color: rgba(241, 76, 76, .25);
+            color: var(--err)
+        }
+
+        .gen-card {
+            background: var(--vscode-editor-background);
+            border: 1px solid var(--vscode-panel-border);
+            border-radius: 4px;
+            padding: 10px
+        }
+
+        .gen-card.locked {
+            opacity: .55
+        }
+
+        .gen-title {
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 3px
+        }
+
+        .gen-desc {
+            font-size: 11px;
+            color: var(--vscode-descriptionForeground);
+            margin-bottom: 8px;
+            line-height: 1.5
+        }
+
+        .ctx-strip {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 8px;
+            background: rgba(78, 201, 148, .06);
+            border: 1px solid rgba(78, 201, 148, .2);
+            border-radius: 3px;
+            font-size: 10px
+        }
+
+        .editor-area {
+            background: var(--vscode-editor-background);
+            border: 1px solid var(--vscode-input-border, var(--vscode-panel-border));
+            border-radius: 3px;
+            color: var(--vscode-editor-foreground);
+            font-family: var(--vscode-editor-font-family, monospace);
+            font-size: 11px;
+            line-height: 1.6;
+            padding: 8px;
+            outline: none;
+            resize: none;
+            width: 100%;
+            min-height: 220px;
+            white-space: pre-wrap;
+            word-break: break-word;
+            overflow-y: auto
+        }
+
+        .editor-area:focus {
+            border-color: var(--vscode-focusBorder, var(--bp))
+        }
+
+        /* Bottom bar */
+        .bottom-bar {
+            display: none;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            border-top: 1px solid var(--vscode-panel-border);
+            background: var(--vscode-sideBar-background);
+            flex-shrink: 0
+        }
+
+        .bottom-bar.show {
+            display: flex
+        }
+
+        .bar-spacer {
+            flex: 1
+        }
+
+        /* Error */
+        .err-card {
+            background: rgba(241, 76, 76, .06);
+            border: 1px solid rgba(241, 76, 76, .2);
+            border-radius: 4px;
+            padding: 10px
+        }
+
+        .err-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--err);
+            margin-bottom: 5px
+        }
+
+        .err-msg {
+            font-family: var(--vscode-editor-font-family, monospace);
+            font-size: 10px;
+            opacity: .8;
+            word-break: break-all;
+            line-height: 1.5
+        }
+
+        /* Handoff */
+        .handoff-hero {
+            background: linear-gradient(135deg, var(--bp-dim), transparent);
+            border: 1px solid var(--bp-b);
+            border-radius: 5px;
+            padding: 12px;
+            text-align: center
+        }
+
+        .invoke-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: var(--bp-g);
+            color: #fff;
+            font-family: var(--vscode-font-family);
+            font-size: 12px;
+            font-weight: 700;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            padding: 7px 18px;
+            transition: opacity .15s;
+            box-shadow: 0 2px 10px rgba(124, 107, 252, .3)
+        }
+
+        .invoke-btn:hover {
+            opacity: .9
+        }
+
+        /* Mini prov */
+        .mini-prov {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-bottom: 1px solid var(--vscode-panel-border);
+            flex-shrink: 0;
+            background: var(--vscode-editor-background)
+        }
+
+        .mini-prov-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%
+        }
+
+        .mini-prov-name {
+            font-size: 11px;
+            flex: 1;
+            color: var(--vscode-descriptionForeground)
+        }
+
+        /* Welcome */
+        .welcome {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 20px 10px;
+            gap: 6px;
+            flex: 1;
+            justify-content: center
+        }
+
+        .welcome-icon {
+            font-size: 24px;
+            opacity: .4
+        }
+
+        .welcome-title {
+            font-size: 13px;
+            font-weight: 600
+        }
+
+        .welcome-desc {
+            font-size: 11px;
+            color: var(--vscode-descriptionForeground);
+            max-width: 200px;
+            line-height: 1.5
+        }
+
+        /* Toast */
+        .toast-stack {
+            position: fixed;
+            bottom: 52px;
+            left: 10px;
+            right: 10px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            pointer-events: none
+        }
+
+        .toast {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--vscode-notifications-background, var(--vscode-editor-background));
+            border: 1px solid var(--vscode-notifications-border, var(--vscode-panel-border));
+            border-radius: 4px;
+            padding: 6px 9px;
+            font-size: 11px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, .2);
+            animation: tin .2s ease;
+            pointer-events: auto
+        }
+
+        .toast.success {
+            border-left: 3px solid var(--ok)
+        }
+
+        .toast.error {
+            border-left: 3px solid var(--err)
+        }
+
+        .toast.warning {
+            border-left: 3px solid var(--warn)
+        }
+
+        @keyframes tin {
+            from {
+                opacity: 0;
+                transform: translateY(6px)
+            }
+
+            to {
+                opacity: 1;
+                transform: none
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--vscode-scrollbarSlider-background);
+            border-radius: 4px
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--vscode-scrollbarSlider-hoverBackground)
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="toast-stack" id="toasts"></div>
+
+    <!-- ════════ SETUP SCREEN ════════ -->
+    <div class="screen" id="screen-setup">
+        <div class="logo-bar">
+            <div class="logo-mark">◈</div>
+            <span class="logo-text">Blueprint</span>
+            <span class="logo-ver">v0.1</span>
+        </div>
+        <div class="scroll-body">
+
+            <div class="sec">LLM Provider</div>
+            <div class="prov-card">
+                <div class="prov-dot no" id="s-pdot"></div>
+                <div class="prov-info">
+                    <div class="prov-name" id="s-pname">Not configured</div>
+                    <div class="prov-model" id="s-pmodel">Open settings</div>
+                </div>
+                <div class="prov-badge no" id="s-pbadge">Setup needed</div>
+            </div>
+            <button class="btn btn-secondary btn-full" onclick="openSettings()">⚙ &nbsp;Open LLM Settings</button>
+
+            <div id="no-ws-warn" style="display:none">
+                <div class="warn-card">⚠&nbsp; Open a workspace folder first.</div>
+            </div>
+
+            <div class="divider"></div>
+            <div class="sec">Project Details</div>
+
+            <div class="field">
+                <label>Project Name *</label>
+                <input type="text" id="s-name" placeholder="FinTrack, ShopFlow…" maxlength="60" />
+            </div>
+            <div class="field-row">
+                <div class="field">
+                    <label>Client / Brand</label>
+                    <input type="text" id="s-client" placeholder="Nike, Stripe… (optional)" />
+                </div>
+                <div class="field">
+                    <label>Industry</label>
+                    <select id="s-industry">
+                        <option value="">General</option>
+                        <option>SaaS</option>
+                        <option>FinTech</option>
+                        <option>HealthTech</option>
+                        <option>E-commerce</option>
+                        <option>EdTech</option>
+                        <option>AI / ML</option>
+                        <option>Other</option>
+                    </select>
+                </div>
+            </div>
+            <div class="field" id="s-url-row" style="display:none">
+                <label>Client Website</label>
+                <input type="url" id="s-client-url" placeholder="https://nike.com" />
+                <span class="hint">We'll auto-extract their brand colors & typography</span>
+            </div>
+
+            <div class="sec" style="margin-top:2px">Requirements *</div>
+            <div class="field">
+                <textarea id="s-desc" style="min-height:90px"
+                    placeholder="Describe your app — problem it solves, who uses it, core features. More detail = better specs."></textarea>
+            </div>
+            <div class="file-row">
+                <button class="btn btn-secondary btn-sm" onclick="browseFile()">📄 Import file</button>
+                <span id="file-tag" class="file-tag" style="display:none"></span>
+            </div>
+
+            <div class="field" style="margin-top:4px">
+                <label>Build Level</label>
+                <div class="level-picker" id="level-picker">
+                    <button class="level-btn active" data-level="prototype" onclick="setLevel('prototype')">⚡
+                        Prototype</button>
+                    <button class="level-btn" data-level="mvp" onclick="setLevel('mvp')">🚀 MVP</button>
+                    <button class="level-btn" data-level="production" onclick="setLevel('production')">🏭
+                        Production</button>
+                </div>
+                <span class="hint" id="level-hint">Simplest working demo — SQLite, no DevOps, move fast</span>
+            </div>
+
+            <button class="btn btn-bp btn-full" id="s-start-btn" onclick="doStart()">◈ &nbsp;Start Blueprint →</button>
+            <div id="resume-row" style="display:none">
+                <button class="btn btn-secondary btn-full" onclick="doResume()">▷ Resume Existing Project</button>
+            </div>
+
+            <div class="divider"></div>
+            <div class="sec">8-Phase TDD Workflow</div>
+            <div class="checklist">
+                <div class="check-item"><span style="width:14px">✦</span>Phase 1 — Identity: Brand &amp; visual system
+                </div>
+                <div class="check-item"><span style="width:14px">◈</span>Phase 2 — Scope: Requirements &amp; user
+                    stories</div>
+                <div class="check-item" style="padding-left:14px;color:var(--bp)">⚡ Tech Stack wizard unlocks here</div>
+                <div class="check-item"><span style="width:14px">⬡</span>Phase 3 — Skeleton: Architecture</div>
+                <div class="check-item"><span style="width:14px">⬢</span>Phase 4 — Contract: FastAPI endpoints</div>
+                <div class="check-item"><span style="width:14px">◉</span>Phase 5 — Testing: TDD strategy + patterns
+                </div>
+                <div class="check-item"><span style="width:14px">◈</span>Phase 6 — Data: SQLAlchemy models</div>
+                <div class="check-item"><span style="width:14px">◇</span>Phase 7 — Design: UI/UX + Wow Factor</div>
+                <div class="check-item"><span style="width:14px">⬟</span>Phase 8 — Handoff: One-shot master prompt</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ════════ MAIN SCREEN ════════ -->
+    <div class="screen" id="screen-main" style="position:relative">
+
+        <!-- Tech Stack Overlay (shown mid-flow after scope approval) -->
+        <div class="ts-overlay" id="ts-overlay" style="display:none">
+            <div class="ts-panel">
+                <div class="ts-hdr">
+                    <span class="ts-hdr-icon">🔧</span>
+                    <div>
+                        <div class="ts-hdr-title">Tech Stack — Prototype Level</div>
+                        <div class="hint">Based on your confirmed scope. Pick the simplest option that works.</div>
+                    </div>
+                </div>
+                <div class="ts-body" id="ts-body">
+                    <div class="spin-wrap" id="ts-loading">
+                        <div class="spinner"></div>
+                        <div class="spin-label">Analyzing your feature list…</div>
+                        <div class="spin-sub">Generating prototype-appropriate questions</div>
+                        <div class="dots"><span></span><span></span><span></span></div>
+                    </div>
+                    <div id="ts-q-list" style="display:none"></div>
+                </div>
+                <div class="ts-footer" id="ts-footer" style="display:none">
+                    <button class="btn btn-secondary btn-sm" onclick="skipStack()">Skip for now</button>
+                    <div style="flex:1"></div>
+                    <button class="btn btn-bp btn-sm" onclick="confirmStack()">✓ Confirm Stack</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="proj-hdr">
+            <div class="proj-hdr-icon">◈</div>
+            <span class="proj-hdr-name" id="proj-name">Project</span>
+            <div class="proj-hdr-acts">
+                <button class="btn-icon" title="Settings" onclick="openSettings()">
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                        <path
+                            d="M9.1 1H6.9l-.3 1.5a5.3 5.3 0 00-1 .6L4 2.7 2.7 4l.8 1.5a5.3 5.3 0 000 1.1L2.7 8 4 9.3l1.5-.8a5.3 5.3 0 001 .6L6.9 11h2.2l.3-1.5a5.3 5.3 0 001-.6l1.5.8L13.3 8l-.8-1.4a5.3 5.3 0 000-1.1l.8-1.5L12 2.7l-1.5.8a5.3 5.3 0 00-1-.6L9.1 1zM8 10a2 2 0 110-4 2 2 0 010 4z" />
+                    </svg>
+                </button>
+                <button class="btn-icon" title="New Project" onclick="vscode.postMessage({type:'newProject'})">
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                        <path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <div class="mini-prov">
+            <div class="mini-prov-dot ok" id="m-pdot" style="background:var(--warn)"></div>
+            <span class="mini-prov-name" id="m-pname"></span>
+            <button class="btn-link" onclick="openSettings()">Change</button>
+        </div>
+
+        <div class="prog-wrap">
+            <div class="prog-bar">
+                <div class="prog-fill" id="prog-fill" style="width:0%"></div>
+            </div>
+            <div class="prog-lbl" id="prog-lbl">0 / 10 phases</div>
+        </div>
+
+        <div class="phase-tree" id="phase-tree"></div>
+        <div class="content-panel" id="content-panel">
+            <div class="welcome">
+                <div class="welcome-icon">◈</div>
+                <div class="welcome-title">Project ready</div>
+                <div class="welcome-desc">Select Phase 1 to start generating.</div>
+                <button class="btn btn-bp btn-sm" style="margin-top:6px" onclick="selectPhase(1)">Start Phase 1</button>
+            </div>
+        </div>
+
+        <!-- Bottom Action Bar (review mode only) -->
+        <div class="bottom-bar" id="bottom-bar">
+            <button class="btn btn-secondary btn-sm" onclick="barRegen()">↺ Regen</button>
+            <button class="btn btn-secondary btn-sm" onclick="barPreview()">↗ MD</button>
+            <button class="btn btn-secondary btn-sm" onclick="barCopy()">⧉</button>
+            <div class="bar-spacer"></div>
+            <button class="btn btn-secondary btn-sm" id="bar-save" onclick="barSaveOpen()"
+                title="Approve and open the saved .md file">Save+Open</button>
+            <button class="btn btn-bp btn-sm" id="bar-approve" onclick="barApprove()">✓ Approve</button>
+        </div>
+    </div>
+    </div>
+
+    <script>
+        const vscode = acquireVsCodeApi();
+
+        const PHASES = [
+            { id: 1, name: 'Identity', sub: 'Vision, Branding & Color Palettes', icon: '✦', agent: 'Identity Agent' },
+            { id: 2, name: 'Scope', sub: 'Requirements & User Stories', icon: '◈', agent: 'Scope Agent' },
+            { id: 3, name: 'Skeleton', sub: 'System Architecture & Modules', icon: '⬡', agent: 'Architecture Agent' },
+            { id: 4, name: 'Contract', sub: 'FastAPI Endpoint Definitions', icon: '⬢', agent: 'API Contract Agent' },
+            { id: 5, name: 'Testing', sub: 'TDD Strategy + Mocking Patterns', icon: '◉', agent: 'Testing Agent' },
+            { id: 6, name: 'Data', sub: 'SQLAlchemy Database Modeling', icon: '◈', agent: 'Data Agent' },
+            { id: 7, name: 'Design', sub: 'UI/UX, Wow Factor & Animations', icon: '◇', agent: 'Design Agent' },
+            { id: 8, name: 'Handoff', sub: 'One-Shot Master Prompt', icon: '⬟', agent: 'Handoff Agent' },
+        ];
+
+        let S = {
+            providerInfo: null, isConfigured: false, configError: null, hasWorkspace: false,
+            projectState: null, selectedPhase: null, reviewPhaseId: null, reviewStatus: null,
+            projectLevel: 'prototype', // Default project level
+            tsQuestions: [],
+        };
+
+        // ── Messages ─────────────────────────────────────────────────────────────────
+        window.addEventListener('message', e => {
+            const m = e.data;
+            switch (m.type) {
+                case 'init': onInit(m); break;
+                case 'stateUpdate': onStateUpdate(m.state); break;
+                case 'fileContent': onFile(m.content, m.filename); break;
+                case 'techStackLoading': showTsOverlay(true); break;
+                case 'techStackQuestions': onTsQuestions(m.questions); break;
+                case 'techStackDismissed': hideTsOverlay(); break;
+                case 'phaseGenerating': onGenerating(m.phaseId); break;
+                case 'phaseReady': onPhaseReady(m.phaseId, m.content, m.state); break;
+                case 'phaseApproved': onPhaseApproved(m.phaseId, m.state); break;
+                case 'phaseError': onPhaseError(m.phaseId, m.error); break;
+                case 'phaseSelected': onPhaseSelected(m.phaseId, m.phase, m.state); break;
+                case 'error': toast(m.message, 'error'); break;
+                case 'toast': toast(m.text, m.variant); break;
+                case 'showSetup': show('screen-setup'); break;
+            }
+        });
+
+        // ── Init ────────────────────────────────────────────────────────────────────
+        function onInit(m) {
+            S.providerInfo = m.providerInfo; S.isConfigured = m.isConfigured;
+            S.configError = m.configError; S.hasWorkspace = m.hasWorkspace;
+            updateProvUI();
+            if (m.existingState) {
+                S.projectState = m.existingState; show('screen-main');
+                renderTree(); updateProg(); updateMiniProv();
+                const cur = m.existingState.phases.find(p => p.id === m.existingState.currentPhase);
+                if (cur) selectPhase(cur.id);
+                document.getElementById('resume-row').style.display = 'block';
+            } else { show('screen-setup'); }
+        }
+
+        function onStateUpdate(state) {
+            S.projectState = state; show('screen-main'); renderTree(); updateProg(); updateMiniProv();
+            setContent(`<div class="welcome"><div class="welcome-icon">◈</div>
+    <div class="welcome-title">Blueprint initialized!</div>
+    <div class="welcome-desc">Select Phase 1 to start generating specs.</div>
+    <button class="btn btn-bp btn-sm" style="margin-top:6px" onclick="selectPhase(1)">Start Phase 1</button>
+  </div>`); hideBar();
+        }
+
+        // ── Provider UI ──────────────────────────────────────────────────────────────
+        function updateProvUI() {
+            const dot = document.getElementById('s-pdot'), nm = document.getElementById('s-pname'),
+                mdl = document.getElementById('s-pmodel'), bdg = document.getElementById('s-pbadge');
+            document.getElementById('no-ws-warn').style.display = S.hasWorkspace ? 'none' : 'block';
+            if (S.providerInfo && S.isConfigured) {
+                dot.className = 'prov-dot ok'; nm.textContent = S.providerInfo.label;
+                mdl.textContent = S.providerInfo.model; bdg.textContent = 'Ready'; bdg.className = 'prov-badge ok';
+            } else {
+                dot.className = 'prov-dot no'; nm.textContent = S.providerInfo?.label || 'Not configured';
+                mdl.textContent = S.configError || 'Open Settings'; bdg.textContent = 'Setup needed'; bdg.className = 'prov-badge no';
+            }
+        }
+
+        function updateMiniProv() {
+            if (!S.providerInfo) return;
+            document.getElementById('m-pdot').style.background = S.isConfigured ? 'var(--ok)' : 'var(--warn)';
+            document.getElementById('m-pname').textContent = `${S.providerInfo.label} — ${S.providerInfo.model}`;
+        }
+
+        // ── Setup actions ────────────────────────────────────────────────────────────
+        document.getElementById('s-client').addEventListener('input', function () {
+            document.getElementById('s-url-row').style.display = this.value.trim() ? 'flex' : 'none';
+        });
+
+        function browseFile() { vscode.postMessage({ type: 'browseFile' }); }
+        function onFile(content, filename) {
+            document.getElementById('s-desc').value = content;
+            const tag = document.getElementById('file-tag'); tag.style.display = 'inline'; tag.textContent = filename;
+            toast(`Loaded: ${filename}`, 'success');
+        }
+
+        function setLevel(level) {
+            S.projectLevel = level;
+            document.querySelectorAll('.level-btn').forEach(b => b.classList.toggle('active', b.dataset.level === level));
+            const hints = {
+                prototype: 'Simplest working demo — SQLite, no DevOps, move fast',
+                mvp: 'Production-like but not over-engineered — PostgreSQL, basic auth',
+                production: 'Enterprise-grade — full security, scalability, observability',
+            };
+            document.getElementById('level-hint').textContent = hints[level];
+        }
+
+        function doStart() {
+            const name = document.getElementById('s-name').value.trim();
+            const desc = document.getElementById('s-desc').value.trim();
+            if (!name) { toast('Enter a project name.', 'error'); return; }
+            if (!desc) { toast('Describe your project.', 'error'); return; }
+            if (!S.isConfigured) { toast(S.configError || 'Set up your LLM provider first.', 'error'); openSettings(); return; }
+            if (!S.hasWorkspace) { toast('Open a workspace folder first.', 'error'); return; }
+            document.getElementById('s-start-btn').textContent = 'Initializing…';
+            document.getElementById('s-start-btn').disabled = true;
+            vscode.postMessage({
+                type: 'initProject',
+                projectName: name,
+                description: desc,
+                projectLevel: S.projectLevel || 'prototype',
+                clientName: document.getElementById('s-client').value.trim(),
+                clientWebsiteUrl: document.getElementById('s-client-url').value.trim(),
+                industry: document.getElementById('s-industry').value,
+            });
+        }
+
+        function doResume() { if (S.projectState) { show('screen-main'); updateMiniProv(); } }
+
+        // ── Tech Stack Overlay ────────────────────────────────────────────────────────
+        function showTsOverlay(loading) {
+            document.getElementById('ts-overlay').style.display = 'flex';
+            document.getElementById('ts-loading').style.display = loading ? 'flex' : 'none';
+            document.getElementById('ts-q-list').style.display = loading ? 'none' : 'flex';
+            document.getElementById('ts-footer').style.display = loading ? 'none' : 'flex';
+        }
+        function hideTsOverlay() { document.getElementById('ts-overlay').style.display = 'none'; }
+
+        function onTsQuestions(questions) {
+            S.tsQuestions = questions;
+            document.getElementById('ts-loading').style.display = 'none';
+            const list = document.getElementById('ts-q-list');
+            list.style.display = 'flex'; list.style.flexDirection = 'column'; list.style.gap = '8px';
+            list.innerHTML = '';
+            questions.forEach(q => {
+                const div = document.createElement('div'); div.className = 'ts-q';
+                div.innerHTML = `<div class="ts-q-title">${q.question}</div>
+      ${q.description ? `<div class="ts-q-desc">${q.description}</div>` : ''}
+      <div class="ts-opts" id="to-${q.id}"></div>
+      ${q.reason ? `<div class="ts-reason">★ For a prototype: ${q.reason}</div>` : ''}`;
+                const opts = div.querySelector(`#to-${q.id}`);
+                q.options.forEach(opt => {
+                    const lbl = document.createElement('label'); lbl.className = `ts-opt${opt === q.selected ? ' sel' : ''}`;
+                    lbl.innerHTML = `<input type="radio" name="${q.id}" value="${opt}" ${opt === q.selected ? 'checked' : ''}/>
+        ${opt}${opt === q.recommended ? '<span class="ts-rec">Recommended</span>' : ''}`;
+                    lbl.querySelector('input').addEventListener('change', () => {
+                        q.selected = opt;
+                        opts.querySelectorAll('.ts-opt').forEach(l => l.classList.remove('sel'));
+                        lbl.classList.add('sel');
+                    });
+                    opts.appendChild(lbl);
+                });
+                list.appendChild(div);
+            });
+            document.getElementById('ts-footer').style.display = 'flex';
+        }
+
+        function confirmStack() {
+            vscode.postMessage({ type: 'confirmTechStack', answers: S.tsQuestions.map(q => ({ ...q })) });
+        }
+        function skipStack() {
+            vscode.postMessage({ type: 'skipTechStack' });
+        }
+
+        // ── Phase tree ────────────────────────────────────────────────────────────────
+        function renderTree() {
+            const tree = document.getElementById('phase-tree'); if (!tree || !S.projectState) return;
+            tree.innerHTML = ''; document.getElementById('proj-name').textContent = S.projectState.projectName;
+            S.projectState.phases.forEach(p => {
+                const def = PHASES.find(d => d.id === p.id); if (!def) return;
+                const el = document.createElement('div');
+                el.className = `ph-item ${p.status}${S.selectedPhase === p.id ? ' sel' : ''}`;
+                el.dataset.phaseId = p.id; el.onclick = () => selectPhase(p.id);
+                const icon = p.status === 'completed' ? '✓' : p.status === 'error' ? '!' : def.id;
+                el.innerHTML = `<div class="ph-ind">${icon}</div><div class="ph-txt"><div class="ph-name">${def.name}</div><div class="ph-sub">${def.sub}</div></div>`;
+                tree.appendChild(el);
+            });
+        }
+
+        function hiliteTree(id) { document.querySelectorAll('.ph-item').forEach(el => el.classList.toggle('sel', parseInt(el.dataset.phaseId) === id)); }
+        function updateProg() {
+            if (!S.projectState) return;
+            const done = S.projectState.phases.filter(p => p.status === 'completed').length;
+            document.getElementById('prog-fill').style.width = (done / 10 * 100) + '%';
+            document.getElementById('prog-lbl').textContent = `${done} / 8 phases`;
+        }
+
+        function selectPhase(id) { S.selectedPhase = id; hiliteTree(id); vscode.postMessage({ type: 'selectPhase', phaseId: id }); }
+        function onPhaseSelected(id, phase, state) { S.projectState = state; renderPhaseForItem(id, phase); }
+
+        function onGenerating(id) {
+            S.selectedPhase = id; hiliteTree(id);
+            const def = PHASES.find(d => d.id === id);
+            const prior = S.projectState?.phases.filter(p => p.id < id && p.status === 'completed').length || 0;
+            setContent(`<div class="ph-hdr">
+    <div class="ph-icon">${def?.icon || '◈'}</div>
+    <div class="ph-meta"><div class="ph-num">Phase ${id}</div><div class="ph-title">${def?.name || ''}</div></div>
+    <div class="status-pill current">● Generating</div>
+  </div>
+  ${prior > 0 ? `<div class="ctx-strip">🔗&nbsp;<span>Feeding <strong>${prior} approved artifact${prior > 1 ? 's' : ''}</strong> as context — your edits included</span></div>` : ''}
+  <div class="spin-wrap">
+    <div class="spinner"></div>
+    <div class="spin-label">${def?.agent || `Phase ${id} Agent`}</div>
+    <div class="spin-sub">Building specification…</div>
+    <div class="dots"><span></span><span></span><span></span></div>
+  </div>`); hideBar();
+        }
+
+        function onPhaseReady(id, content, state) {
+            if (state) { S.projectState = state; renderTree(); updateProg(); }
+            S.selectedPhase = id; hiliteTree(id); renderReview(id, content, 'current');
+        }
+
+        function onPhaseApproved(id, state) {
+            S.projectState = state; renderTree(); updateProg();
+            const next = state.phases.find(p => p.id === id + 1);
+            // Find next phase from PHASES array (handles gaps when phases are commented out)
+            const nextDef = PHASES.find(d => d.id > id);
+            if (nextDef) { S.selectedPhase = nextDef.id; hiliteTree(nextDef.id); renderStartCard(nextDef.id); hideBar(); }
+        }
+
+        function onPhaseError(id, error) {
+            if (S.projectState) { const p = S.projectState.phases.find(p => p.id === id); if (p) p.status = 'error'; renderTree(); }
+            const def = PHASES.find(d => d.id === id);
+            setContent(`<div class="ph-hdr">
+    <div class="ph-icon" style="border-color:rgba(241,76,76,.3);background:rgba(241,76,76,.1)">⚠</div>
+    <div class="ph-meta"><div class="ph-num">Phase ${id}</div><div class="ph-title">${def?.name || ''}</div></div>
+    <div class="status-pill error">⚠ Error</div>
+  </div>
+  <div class="err-card"><div class="err-title">Generation Failed</div><div class="err-msg">${esc(error)}</div></div>
+  <div style="display:flex;gap:6px">
+    <button class="btn btn-bp btn-sm" onclick="vscode.postMessage({type:'runPhase',phaseId:${id}})">↺ Try Again</button>
+    <button class="btn btn-secondary btn-sm" onclick="openSettings()">⚙ Settings</button>
+  </div>`); hideBar();
+        }
+
+        function renderPhaseForItem(id, phase) {
+            const content = phase.editedArtifact || phase.artifact;
+            if (phase.status === 'error') { onPhaseError(id, phase.error || 'Unknown error'); return; }
+            if (content) renderReview(id, content, phase.status);
+            else renderStartCard(id);
+        }
+
+        function renderStartCard(id) {
+            const def = PHASES.find(d => d.id === id); if (!def) return;
+            const phase = S.projectState?.phases.find(p => p.id === id);
+            const status = phase?.status || 'pending';
+            // Find previous defined phase in PHASES array
+            const prevDef = [...PHASES].reverse().find(d => d.id < id);
+            const prevDone = !prevDef || S.projectState?.phases.find(p => p.id === prevDef.id)?.status === 'completed';
+            const prior = S.projectState?.phases.filter(p => p.id < id && p.status === 'completed').length || 0;
+            setContent(`<div class="ph-hdr">
+    <div class="ph-icon">${def.icon}</div>
+    <div class="ph-meta"><div class="ph-num">Phase ${id}</div><div class="ph-title">${def.name}</div><div class="ph-desc">${def.sub}</div></div>
+    <div class="status-pill ${status}">${stLabel(status)}</div>
+  </div>
+  ${prior > 0 ? `<div class="ctx-strip">🔗&nbsp;<span>${prior} approved artifact${prior > 1 ? 's' : ''} will feed into this agent — <strong>including your edits</strong></span></div>` : ''}
+  <div class="gen-card${!prevDone ? ' locked' : ''}">
+    <div class="gen-title">Run ${def.agent}</div>
+    <div class="gen-desc">${!prevDone ? `Complete the previous phase first.` : `Generates the <em>${def.sub}</em> specification. You can edit before approving.`}</div>
+    ${!prevDone ? `<span class="hint">🔒 Locked</span>` : `<button class="btn btn-bp btn-sm" onclick="vscode.postMessage({type:'runPhase',phaseId:${id}})">✦ Generate</button>`}
+  </div>`); hideBar();
+        }
+
+        function renderReview(id, content, status) {
+            const def = PHASES.find(d => d.id === id);
+            const done = status === 'completed';
+            setContent(`<div class="ph-hdr">
+    <div class="ph-icon">${def?.icon || '◈'}</div>
+    <div class="ph-meta"><div class="ph-num">Phase ${id}</div><div class="ph-title">${def?.name || ''}</div><div class="ph-desc">${def?.sub || ''}</div></div>
+    <div class="status-pill ${done ? 'completed' : 'current'}">${done ? '✓ Approved' : '● Review'}</div>
+  </div>
+  ${id === 10 ? `<div class="handoff-hero">
+    <div style="font-size:20px;margin-bottom:5px">⬟</div>
+    <div style="font-size:13px;font-weight:700;margin-bottom:4px">Blueprint Complete!</div>
+    <div style="font-size:11px;color:var(--vscode-descriptionForeground);margin-bottom:10px;line-height:1.5">Your master prompt is ready. Invoke below to inject into AI Chat.</div>
+    <button class="invoke-btn" onclick="vscode.postMessage({type:'invokeHandoff'})">🚀 Invoke Handoff</button>
+  </div>`: ''}
+  <div class="hint" style="margin-bottom:3px">${done
+                    ? '📄 Approved. <strong>Sidebar textarea = source of truth</strong> (edit to override). ↗ MD Preview = read-only render. Open File = edit raw .md.'
+                    : '✏ <strong>Edit freely below — this textarea is what feeds into all subsequent agents.</strong> ↗ MD Preview is a read-only render. Open File opens the raw .md.'
+                }</div>
+  <textarea class="editor-area" id="art-ed" spellcheck="false">${esc(content)}</textarea>`);
+            S.reviewPhaseId = id; S.reviewStatus = status; showBar(id, done);
+        }
+
+        // ── Bottom bar ────────────────────────────────────────────────────────────────
+        function showBar(id, done) {
+            document.getElementById('bottom-bar').classList.add('show');
+            const appr = document.getElementById('bar-approve');
+            const save = document.getElementById('bar-save');
+            if (done) {
+                appr.textContent = '✓ Approved'; appr.disabled = true; appr.style.opacity = '.5';
+                save.textContent = 'Open File'; save.disabled = false;
+            } else if (id === 10) {
+                appr.textContent = '🚀 Invoke Handoff'; appr.disabled = false; appr.style.opacity = '1';
+                save.style.display = 'none';
+            } else {
+                const next = PHASES.find(d => d.id > id);
+                appr.textContent = `✓ Approve → ${next?.name || 'Next'}`; appr.disabled = false; appr.style.opacity = '1';
+                save.textContent = 'Save+Open .md'; save.disabled = false; save.style.display = '';
+            }
+        }
+        function hideBar() { document.getElementById('bottom-bar').classList.remove('show'); }
+
+        function barRegen() { if (S.reviewPhaseId) vscode.postMessage({ type: 'regeneratePhase', phaseId: S.reviewPhaseId }); }
+        function barPreview() { if (S.reviewPhaseId) vscode.postMessage({ type: 'openMarkdownPreview', phaseId: S.reviewPhaseId }); }
+        function barCopy() { const ed = document.getElementById('art-ed'); if (ed) vscode.postMessage({ type: 'copyToClipboard', content: ed.value }); }
+        function barApprove() {
+            if (!S.reviewPhaseId) return;
+            if (S.reviewPhaseId === 10) { vscode.postMessage({ type: 'invokeHandoff' }); return; }
+            const ed = document.getElementById('art-ed');
+            vscode.postMessage({ type: 'approvePhase', phaseId: S.reviewPhaseId, editedContent: ed?.value || '', saveAndPreview: false });
+        }
+        function barSaveOpen() {
+            if (!S.reviewPhaseId) return;
+            if (S.reviewPhaseId === 10) { vscode.postMessage({ type: 'openArtifact', phaseId: 10 }); return; }
+            const ed = document.getElementById('art-ed');
+            // If already approved, just open the file. Otherwise approve+open.
+            if (S.reviewStatus === 'completed') {
+                vscode.postMessage({ type: 'openArtifact', phaseId: S.reviewPhaseId });
+            } else {
+                vscode.postMessage({ type: 'approvePhase', phaseId: S.reviewPhaseId, editedContent: ed?.value || '', saveAndPreview: true });
+            }
+        }
+
+        // ── Helpers ───────────────────────────────────────────────────────────────────
+        function show(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id)?.classList.add('active'); }
+        function setContent(html) { document.getElementById('content-panel').innerHTML = html; }
+        function openSettings() { vscode.postMessage({ type: 'openSettings' }); }
+        function stLabel(s) { return s === 'completed' ? '✓ Done' : s === 'current' ? '● Active' : s === 'error' ? '⚠ Error' : '○ Pending'; }
+        function esc(s) { return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+        function toast(text, v = 'info') {
+            const s = document.getElementById('toasts');
+            const t = document.createElement('div'); t.className = `toast ${v}`; t.textContent = text;
+            s.appendChild(t);
+            setTimeout(() => { t.style.transition = 'opacity .3s'; t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 3500);
+        }
+
+        vscode.postMessage({ type: 'ready' });
+        show('screen-setup');
+    </script>
+</body>
+
+</html>

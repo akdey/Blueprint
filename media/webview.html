@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'unsafe-inline'; img-src data: {{MEDIA_URI}};"/>
+<title>Blueprint — Requirement to Prototype</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+/* ===== DESIGN TOKENS ===== */
+:root {
+  --bg-void: #03020a;
+  --bg-base: #07060f;
+  --bg-surface: #0e0c1a;
+  --bg-raised: #141228;
+  --bg-glass: rgba(20, 18, 40, 0.6);
+  --border-subtle: rgba(120, 100, 220, 0.12);
+  --border-glow: rgba(120, 100, 220, 0.35);
+  --accent-violet: #7c5cfc;
+  --accent-indigo: #5e8bff;
+  --accent-cyan: #22d3ee;
+  --accent-emerald: #10b981;
+  --accent-amber: #f59e0b;
+  --accent-rose: #f43f5e;
+  --gradient-primary: linear-gradient(135deg, #7c5cfc 0%, #5e8bff 50%, #22d3ee 100%);
+  --gradient-glow: linear-gradient(135deg, rgba(124,92,252,0.15), rgba(94,139,255,0.1), rgba(34,211,238,0.05));
+  --text-primary: #f0eeff;
+  --text-secondary: rgba(240,238,255,0.65);
+  --text-muted: rgba(240,238,255,0.35);
+  --font-sans: 'Inter', -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --shadow-glow: 0 0 40px rgba(124,92,252,0.18), 0 0 80px rgba(94,139,255,0.08);
+  --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font-sans);
+  background: var(--bg-void);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+
+/* ===== CANVAS BACKGROUND ===== */
+.canvas-bg {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(124,92,252,0.12) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 30% at 80% 80%, rgba(34,211,238,0.06) 0%, transparent 60%);
+}
+.canvas-dots {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image: radial-gradient(circle, rgba(120,100,220,0.18) 1px, transparent 1px);
+  background-size: 32px 32px;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black, transparent);
+}
+
+/* ===== APP SHELL ===== */
+#app { position: relative; z-index: 1; display: flex; flex-direction: column; min-height: 100vh; }
+
+/* ===== SCREENS ===== */
+.screen { display: none; flex-direction: column; min-height: 100vh; }
+.screen.active { display: flex; }
+
+/* ===== SETUP SCREEN ===== */
+.setup-screen {
+  align-items: center; justify-content: center; padding: 2rem;
+  animation: fadeSlideIn 0.5s ease;
+}
+.setup-card {
+  width: 100%; max-width: 560px;
+  background: var(--bg-glass);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  padding: 2.5rem;
+  backdrop-filter: blur(20px);
+  box-shadow: var(--shadow-glow), 0 24px 48px rgba(0,0,0,0.4);
+}
+.logo-mark {
+  width: 52px; height: 52px; border-radius: 14px; margin-bottom: 1.5rem;
+  background: var(--gradient-primary);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem; font-weight: 700; color: white;
+  box-shadow: 0 8px 24px rgba(124,92,252,0.35);
+  animation: pulse-glow 3s ease infinite;
+}
+@keyframes pulse-glow {
+  0%,100% { box-shadow: 0 8px 24px rgba(124,92,252,0.35); }
+  50% { box-shadow: 0 8px 40px rgba(124,92,252,0.6), 0 0 60px rgba(94,139,255,0.2); }
+}
+.setup-title { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.4rem;
+  background: var(--gradient-primary); -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent; background-clip: text; }
+.setup-subtitle { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 2rem; }
+.field-group { display: flex; flex-direction: column; gap: 1.25rem; margin-bottom: 1.75rem; }
+.field { display: flex; flex-direction: column; gap: 0.5rem; }
+.field label { font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); letter-spacing: 0.08em; text-transform: uppercase; }
+.field input, .field textarea {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  padding: 0.75rem 1rem;
+  transition: var(--transition);
+  resize: vertical;
+  outline: none;
+}
+.field input:focus, .field textarea:focus {
+  border-color: var(--accent-violet);
+  background: rgba(124,92,252,0.06);
+  box-shadow: 0 0 0 3px rgba(124,92,252,0.12);
+}
+.field textarea { min-height: 100px; }
+.field .hint { font-size: 0.75rem; color: var(--text-muted); }
+
+/* ===== API KEY SECTION ===== */
+.api-key-section {
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 1.5rem; margin-top: 0.5rem;
+}
+.api-key-status { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem; }
+.status-dot { width: 8px; height: 8px; border-radius: 50%; }
+.status-dot.ok { background: var(--accent-emerald); box-shadow: 0 0 8px var(--accent-emerald); }
+.status-dot.missing { background: var(--accent-amber); box-shadow: 0 0 8px var(--accent-amber); }
+
+/* ===== BUTTONS ===== */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+  font-family: var(--font-sans); font-size: 0.875rem; font-weight: 600;
+  border: none; border-radius: var(--radius-sm); cursor: pointer;
+  padding: 0.75rem 1.5rem; transition: var(--transition); white-space: nowrap;
+}
+.btn-primary {
+  background: var(--gradient-primary); color: white;
+  box-shadow: 0 4px 20px rgba(124,92,252,0.35);
+}
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 30px rgba(124,92,252,0.5); }
+.btn-primary:active { transform: translateY(0); }
+.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+.btn-ghost {
+  background: rgba(255,255,255,0.04); color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
+}
+.btn-ghost:hover { background: rgba(255,255,255,0.08); color: var(--text-primary); border-color: var(--border-glow); }
+.btn-danger { background: rgba(244,63,94,0.15); color: var(--accent-rose); border: 1px solid rgba(244,63,94,0.25); }
+.btn-danger:hover { background: rgba(244,63,94,0.25); }
+.btn-success { background: rgba(16,185,129,0.15); color: var(--accent-emerald); border: 1px solid rgba(16,185,129,0.3); }
+.btn-success:hover { background: rgba(16,185,129,0.25); }
+.btn-lg { padding: 0.875rem 2rem; font-size: 0.95rem; border-radius: var(--radius-md); }
+.btn-sm { padding: 0.45rem 0.9rem; font-size: 0.78rem; }
+.btn-icon { width: 36px; height: 36px; padding: 0; border-radius: var(--radius-sm); }
+
+/* ===== MAIN SCREEN ===== */
+.main-screen { flex-direction: row; height: 100vh; overflow: hidden; }
+.sidebar {
+  width: 260px; min-width: 260px; height: 100vh;
+  background: var(--bg-glass);
+  border-right: 1px solid var(--border-subtle);
+  backdrop-filter: blur(20px);
+  display: flex; flex-direction: column;
+  overflow-y: auto; overflow-x: hidden;
+}
+.sidebar-header {
+  padding: 1.25rem 1.25rem 0.75rem;
+  border-bottom: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+}
+.sidebar-logo { display: flex; align-items: center; gap: 0.65rem; margin-bottom: 0.5rem; }
+.sidebar-logo-mark {
+  width: 28px; height: 28px; border-radius: 7px;
+  background: var(--gradient-primary);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.8rem; font-weight: 700; color: white;
+}
+.sidebar-logo-text { font-size: 1rem; font-weight: 700; letter-spacing: -0.02em;
+  background: var(--gradient-primary); -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent; background-clip: text; }
+.project-title { font-size: 0.72rem; color: var(--text-muted); font-weight: 500; letter-spacing: 0.02em; padding: 0 0.1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ===== PHASE NODES ===== */
+.phase-list { padding: 0.75rem 0.75rem; flex: 1; }
+.phase-node {
+  display: flex; align-items: center; gap: 0.6rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer; transition: var(--transition);
+  margin-bottom: 2px; position: relative;
+}
+.phase-node:hover { background: rgba(124,92,252,0.08); }
+.phase-node.current { background: rgba(124,92,252,0.12); }
+.phase-node.completed { opacity: 0.75; }
+.phase-node.completed:hover { opacity: 1; }
+.phase-node-indicator {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.7rem; font-weight: 700; flex-shrink: 0; transition: var(--transition);
+  border: 1.5px solid transparent;
+}
+.phase-node.pending .phase-node-indicator { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.1); color: var(--text-muted); }
+.phase-node.current .phase-node-indicator { background: rgba(124,92,252,0.2); border-color: var(--accent-violet); color: var(--accent-violet); box-shadow: 0 0 12px rgba(124,92,252,0.4); }
+.phase-node.completed .phase-node-indicator { background: rgba(16,185,129,0.15); border-color: var(--accent-emerald); color: var(--accent-emerald); }
+.phase-node.error .phase-node-indicator { background: rgba(244,63,94,0.15); border-color: var(--accent-rose); color: var(--accent-rose); }
+.phase-node-text { flex: 1; min-width: 0; }
+.phase-node-name { font-size: 0.82rem; font-weight: 600; color: var(--text-primary); }
+.phase-node.pending .phase-node-name { color: var(--text-muted); }
+.phase-node-sub { font-size: 0.68rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.phase-connector {
+  position: absolute; left: 28px; bottom: -4px;
+  width: 1.5px; height: 6px;
+  background: var(--border-subtle); z-index: -1;
+}
+
+.sidebar-footer { padding: 0.75rem; border-top: 1px solid var(--border-subtle); flex-shrink: 0; }
+
+/* ===== CONTENT AREA ===== */
+.content-area {
+  flex: 1; display: flex; flex-direction: column; height: 100vh; overflow: hidden;
+}
+.content-header {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex; align-items: center; gap: 1rem;
+  background: rgba(7,6,15,0.8); backdrop-filter: blur(10px);
+  flex-shrink: 0;
+}
+.phase-badge {
+  display: flex; align-items: center; gap: 0.5rem;
+  background: rgba(124,92,252,0.1);
+  border: 1px solid rgba(124,92,252,0.25);
+  border-radius: 100px; padding: 0.3rem 0.85rem;
+}
+.phase-badge-icon { font-size: 0.8rem; }
+.phase-badge-text { font-size: 0.78rem; font-weight: 600; color: var(--accent-violet); }
+.content-header-title { font-size: 1rem; font-weight: 700; flex: 1; }
+.content-header-sub { font-size: 0.78rem; color: var(--text-muted); }
+.content-body { flex: 1; overflow-y: auto; padding: 1.5rem; }
+
+/* ===== WELCOME PANEL ===== */
+#welcome-panel { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; text-align: center; }
+.welcome-icon { font-size: 3rem; margin-bottom: 1rem; }
+.welcome-title { font-size: 1.4rem; font-weight: 700; margin-bottom: 0.5rem;
+  background: var(--gradient-primary); -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent; background-clip: text; }
+.welcome-desc { color: var(--text-secondary); max-width: 400px; margin: 0 auto 1.5rem; font-size: 0.9rem; }
+
+/* ===== PHASE PANEL ===== */
+#phase-panel { display: none; flex-direction: column; gap: 1.25rem; }
+.phase-header-card {
+  background: var(--gradient-glow);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem 1.5rem;
+  display: flex; align-items: center; gap: 1rem;
+}
+.phase-icon-large {
+  width: 48px; height: 48px; border-radius: var(--radius-md);
+  background: rgba(124,92,252,0.15); border: 1px solid rgba(124,92,252,0.25);
+  display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0;
+}
+.phase-meta { flex: 1; }
+.phase-meta-num { font-size: 0.72rem; font-weight: 600; color: var(--accent-violet); letter-spacing: 0.1em; text-transform: uppercase; }
+.phase-meta-name { font-size: 1.2rem; font-weight: 700; }
+.phase-meta-sub { font-size: 0.82rem; color: var(--text-secondary); }
+
+/* ===== GENERATE CARD ===== */
+.generate-card {
+  background: var(--bg-glass); border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg); padding: 1.25rem 1.5rem;
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  backdrop-filter: blur(10px);
+}
+.generate-info { flex: 1; }
+.generate-title { font-size: 0.9rem; font-weight: 600; margin-bottom: 0.2rem; }
+.generate-desc { font-size: 0.78rem; color: var(--text-muted); }
+
+/* ===== GENERATING STATE ===== */
+#generating-panel { display: none; flex-direction: column; align-items: center; justify-content: center; min-height: 40vh; gap: 1.5rem; }
+.spinner-ring {
+  width: 64px; height: 64px; border-radius: 50%;
+  border: 3px solid rgba(124,92,252,0.15);
+  border-top-color: var(--accent-violet);
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.generating-label { font-size: 0.9rem; color: var(--text-secondary); }
+.generating-phase { font-size: 1.1rem; font-weight: 700; color: var(--accent-violet); }
+.thinking-dots { display: flex; gap: 6px; }
+.thinking-dots span {
+  width: 7px; height: 7px; border-radius: 50%; background: var(--accent-violet);
+  animation: bounce 1.2s ease infinite;
+}
+.thinking-dots span:nth-child(2) { animation-delay: 0.2s; }
+.thinking-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce { 0%,80%,100% { transform: scale(0.6); opacity: 0.4; } 40% { transform: scale(1); opacity: 1; } }
+
+/* ===== REVIEW PANEL ===== */
+#review-panel { display: none; flex-direction: column; gap: 1rem; }
+.review-toolbar {
+  display: flex; align-items: center; gap: 0.75rem;
+  background: var(--bg-glass); border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md); padding: 0.65rem 1rem; backdrop-filter: blur(10px);
+}
+.review-toolbar-label { font-size: 0.78rem; color: var(--text-muted); flex: 1; }
+.editor-area {
+  background: rgba(0,0,0,0.3); border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md); min-height: 50vh;
+  font-family: var(--font-mono); font-size: 0.82rem; line-height: 1.7;
+  color: var(--text-primary); padding: 1.25rem; outline: none; resize: vertical;
+  transition: border-color 0.2s;
+  white-space: pre-wrap; word-break: break-word;
+  overflow-y: auto;
+}
+.editor-area:focus { border-color: var(--accent-violet); background: rgba(124,92,252,0.03); }
+.review-actions {
+  display: flex; gap: 0.75rem; align-items: center;
+  background: var(--bg-glass); border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md); padding: 0.75rem 1rem; backdrop-filter: blur(10px);
+}
+.review-actions-right { margin-left: auto; display: flex; gap: 0.75rem; }
+
+/* ===== HANDOFF PANEL ===== */
+#handoff-panel { display: none; flex-direction: column; gap: 1.25rem; }
+.handoff-hero {
+  background: linear-gradient(135deg, rgba(124,92,252,0.12), rgba(34,211,238,0.06));
+  border: 1px solid rgba(124,92,252,0.25);
+  border-radius: var(--radius-xl);
+  padding: 2rem; text-align: center;
+}
+.handoff-hero-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+.handoff-hero-title { font-size: 1.4rem; font-weight: 700; margin-bottom: 0.5rem;
+  background: var(--gradient-primary); -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent; background-clip: text; }
+.handoff-hero-desc { font-size: 0.875rem; color: var(--text-secondary); max-width: 400px; margin: 0 auto 1.5rem; }
+.invoke-btn {
+  display: inline-flex; align-items: center; gap: 0.6rem;
+  background: var(--gradient-primary); color: white;
+  font-family: var(--font-sans); font-size: 1rem; font-weight: 700;
+  border: none; border-radius: var(--radius-md); cursor: pointer;
+  padding: 0.9rem 2.5rem; transition: var(--transition);
+  box-shadow: 0 8px 30px rgba(124,92,252,0.4);
+  animation: pulse-glow 2s ease infinite;
+}
+.invoke-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(124,92,252,0.6); }
+
+/* ===== TOAST ===== */
+.toast-stack { position: fixed; top: 1rem; right: 1rem; z-index: 9999; display: flex; flex-direction: column; gap: 0.5rem; }
+.toast {
+  display: flex; align-items: center; gap: 0.75rem;
+  background: var(--bg-raised); border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md); padding: 0.75rem 1rem;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  animation: slideInRight 0.3s ease; max-width: 350px;
+  font-size: 0.85rem;
+}
+.toast.error { border-color: rgba(244,63,94,0.3); }
+.toast.success { border-color: rgba(16,185,129,0.3); }
+@keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+@keyframes fadeSlideIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ===== SETTINGS MODAL ===== */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center;
+}
+.modal-overlay.active { display: flex; }
+.modal {
+  background: var(--bg-surface); border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl); padding: 2rem; width: 480px; max-width: 95vw;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+  animation: fadeSlideIn 0.3s ease;
+}
+.modal-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 1.5rem;
+  display: flex; align-items: center; justify-content: space-between; }
+.modal-close { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.2rem; padding: 0.25rem; }
+.modal-close:hover { color: var(--text-primary); }
+.modal-actions { display: flex; gap: 0.75rem; margin-top: 1.5rem; justify-content: flex-end; }
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-subtle); border-radius: 100px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-glow); }
+
+/* ===== PROGRESS BAR ===== */
+.progress-bar { height: 2px; background: var(--border-subtle); border-radius: 100px; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--gradient-primary); transition: width 0.5s ease; border-radius: 100px; }
+
+/* ===== EMPTY STATE ===== */
+.empty-state {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-height: 40vh; text-align: center; gap: 0.75rem;
+}
+.empty-state-icon { font-size: 2.5rem; opacity: 0.4; }
+.empty-state-title { font-size: 1rem; font-weight: 600; color: var(--text-secondary); }
+.empty-state-desc { font-size: 0.82rem; color: var(--text-muted); max-width: 280px; }
+
+/* ===== ARTIFACT TAG ===== */
+.artifact-tag {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  background: rgba(16,185,129,0.08); color: var(--accent-emerald);
+  border: 1px solid rgba(16,185,129,0.2); border-radius: 100px;
+  font-size: 0.7rem; font-weight: 600; padding: 0.2rem 0.6rem;
+}
+
+/* Error state */
+#error-panel { display: none; flex-direction: column; gap: 1rem; }
+.error-card {
+  background: rgba(244,63,94,0.05); border: 1px solid rgba(244,63,94,0.2);
+  border-radius: var(--radius-lg); padding: 1.5rem;
+}
+.error-msg { font-family: var(--font-mono); font-size: 0.8rem; color: var(--accent-rose); word-break: break-all; }
+</style>
+</head>
+<body>
+<div class="canvas-bg"></div>
+<div class="canvas-dots"></div>
+<div class="toast-stack" id="toast-stack"></div>
+
+<!-- Settings Modal -->
+<div class="modal-overlay" id="settings-modal">
+  <div class="modal">
+    <div class="modal-title">
+      <span>⚙ Settings</span>
+      <button class="modal-close" onclick="closeModal('settings-modal')">✕</button>
+    </div>
+    <div class="field-group">
+      <div class="field">
+        <label>Gemini API Key</label>
+        <input type="password" id="modal-api-key" placeholder="AIza..."/>
+        <span class="hint">Get your key at <a href="#" style="color:var(--accent-violet)">aistudio.google.com</a></span>
+      </div>
+      <div class="field">
+        <label>Model</label>
+        <select id="modal-model" style="background:rgba(255,255,255,0.04);border:1px solid var(--border-subtle);border-radius:var(--radius-sm);color:var(--text-primary);padding:0.75rem 1rem;font-family:var(--font-sans);font-size:0.9rem;outline:none;">
+          <option value="gemini-2.0-flash">Gemini 2.0 Flash (Recommended)</option>
+          <option value="gemini-2.0-flash-thinking-exp">Gemini 2.0 Flash Thinking</option>
+          <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('settings-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+    </div>
+  </div>
+</div>
+
+<div id="app">
+  <!-- SETUP SCREEN -->
+  <div class="screen setup-screen" id="screen-setup">
+    <div class="setup-card">
+      <div class="logo-mark">◈</div>
+      <div class="setup-title">Blueprint</div>
+      <div class="setup-subtitle">Transform your idea into a production-ready developer specification in 10 phases.</div>
+      <div class="field-group">
+        <div class="field">
+          <label>Project Name</label>
+          <input type="text" id="setup-name" placeholder="e.g. FinTrack, ShopFlow, MediConnect..." maxlength="60"/>
+        </div>
+        <div class="field">
+          <label>Project Description</label>
+          <textarea id="setup-desc" placeholder="Describe your project idea in detail. What problem does it solve? Who are the users? What are the core features?"></textarea>
+          <span class="hint">The more detail you provide, the more precise the specifications.</span>
+        </div>
+      </div>
+      <div class="api-key-section">
+        <div class="api-key-status">
+          <div class="status-dot" id="api-status-dot"></div>
+          <span style="font-size:0.8rem;color:var(--text-secondary)" id="api-status-text">Checking API key...</span>
+          <button class="btn btn-ghost btn-sm" onclick="openModal('settings-modal')" style="margin-left:auto">⚙ Settings</button>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-lg" id="start-btn" onclick="handleStart()" style="width:100%;margin-top:1rem;">
+        ◈ Begin Blueprint
+      </button>
+      <div id="resume-section" style="display:none;margin-top:0.75rem;">
+        <button class="btn btn-ghost" onclick="handleResume()" style="width:100%;">▷ Resume Existing Project</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN SCREEN -->
+  <div class="screen main-screen" id="screen-main">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">
+          <div class="sidebar-logo-mark">◈</div>
+          <span class="sidebar-logo-text">Blueprint</span>
+        </div>
+        <div class="project-title" id="sidebar-project-title">No project loaded</div>
+      </div>
+
+      <nav class="phase-list" id="phase-list">
+        <!-- Generated by JS -->
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="progress-bar" style="margin-bottom:0.5rem;">
+          <div class="progress-fill" id="sidebar-progress" style="width:0%"></div>
+        </div>
+        <div style="font-size:0.72rem;color:var(--text-muted);margin-bottom:0.75rem;" id="sidebar-progress-label">0 of 10 phases complete</div>
+        <div style="display:flex;gap:0.5rem;">
+          <button class="btn btn-ghost btn-sm" style="flex:1" onclick="openModal('settings-modal')">⚙</button>
+          <button class="btn btn-ghost btn-sm" style="flex:1" onclick="handleNewProject()">+ New</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Content Area -->
+    <main class="content-area">
+      <div class="content-header">
+        <div>
+          <div class="phase-badge" id="header-badge">
+            <span class="phase-badge-icon">◈</span>
+            <span class="phase-badge-text" id="header-badge-text">Ready</span>
+          </div>
+        </div>
+        <div style="flex:1">
+          <div class="content-header-title" id="header-title">Blueprint</div>
+          <div class="content-header-sub" id="header-sub">Select a phase to begin</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="openModal('settings-modal')">⚙ Settings</button>
+      </div>
+
+      <div class="content-body" id="content-body">
+        <!-- Welcome Panel -->
+        <div id="welcome-panel">
+          <div class="welcome-icon">◈</div>
+          <div class="welcome-title">Ready to Build</div>
+          <div class="welcome-desc">Your project is initialized. Click on Phase 1 in the sidebar to begin generating your Blueprint specifications.</div>
+          <button class="btn btn-primary btn-lg" onclick="startCurrentPhase()">✦ Start Phase 1: Identity</button>
+        </div>
+
+        <!-- Generating Panel -->
+        <div id="generating-panel">
+          <div class="spinner-ring"></div>
+          <div class="generating-phase" id="generating-phase-name">Identity Agent</div>
+          <div class="generating-label">Generating specification...</div>
+          <div class="thinking-dots"><span></span><span></span><span></span></div>
+        </div>
+
+        <!-- Phase Panel -->
+        <div id="phase-panel">
+          <div class="phase-header-card">
+            <div class="phase-icon-large" id="phase-icon">◈</div>
+            <div class="phase-meta">
+              <div class="phase-meta-num" id="phase-num">PHASE 1</div>
+              <div class="phase-meta-name" id="phase-name">Identity</div>
+              <div class="phase-meta-sub" id="phase-sub">Vision, Branding & Color Palettes</div>
+            </div>
+            <div id="phase-status-badge"></div>
+          </div>
+
+          <!-- Generate Card (shown when phase not yet run) -->
+          <div class="generate-card" id="generate-card">
+            <div class="generate-info">
+              <div class="generate-title" id="generate-title">Generate Specification</div>
+              <div class="generate-desc" id="generate-desc">Run the AI agent to generate this phase's artifact.</div>
+            </div>
+            <button class="btn btn-primary" id="generate-btn" onclick="runCurrentPhase()">✦ Generate</button>
+          </div>
+
+          <!-- Review Panel -->
+          <div id="review-panel">
+            <div class="review-toolbar">
+              <span class="artifact-tag">✓ Artifact Generated</span>
+              <span class="review-toolbar-label">Review, edit if needed, then approve to proceed.</span>
+              <button class="btn btn-ghost btn-sm" id="open-file-btn" onclick="openArtifactFile()">↗ Open File</button>
+              <button class="btn btn-ghost btn-sm" onclick="copyContent()">⧉ Copy</button>
+            </div>
+            <textarea class="editor-area" id="artifact-editor" spellcheck="false"></textarea>
+            <div class="review-actions">
+              <button class="btn btn-ghost btn-sm" onclick="regeneratePhase()">↺ Regenerate</button>
+              <div class="review-actions-right">
+                <button class="btn btn-success" id="approve-btn" onclick="approvePhase()">✓ Approve & Continue</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Error Panel -->
+          <div id="error-panel">
+            <div class="error-card">
+              <div style="color:var(--accent-rose);font-weight:600;margin-bottom:0.5rem;">⚠ Generation Failed</div>
+              <div class="error-msg" id="error-msg"></div>
+            </div>
+            <div style="display:flex;gap:0.75rem;">
+              <button class="btn btn-ghost" onclick="regeneratePhase()">↺ Try Again</button>
+              <button class="btn btn-ghost btn-sm" onclick="openModal('settings-modal')">Check API Key</button>
+            </div>
+          </div>
+
+          <!-- Handoff Special Panel -->
+          <div id="handoff-panel">
+            <div class="handoff-hero">
+              <div class="handoff-hero-icon">⬟</div>
+              <div class="handoff-hero-title">Blueprint Complete</div>
+              <div class="handoff-hero-desc">Your master one-shot prompt is ready. Invoke it to prepare the workspace for a coder AI agent.</div>
+              <button class="invoke-btn" onclick="invokeHandoff()">
+                🚀 Invoke Handoff
+              </button>
+            </div>
+            <div class="review-toolbar">
+              <span class="artifact-tag">✓ Master Prompt Ready</span>
+              <span class="review-toolbar-label">Review and edit the master prompt before invoking.</span>
+              <button class="btn btn-ghost btn-sm" onclick="copyContent()">⧉ Copy All</button>
+            </div>
+            <textarea class="editor-area" id="handoff-editor" spellcheck="false" style="min-height:60vh;"></textarea>
+          </div>
+        </div>
+
+        <!-- Empty for completed phases navigation -->
+        <div id="completed-panel" style="display:none;">
+          <div class="empty-state">
+            <div class="empty-state-icon">✓</div>
+            <div class="empty-state-title">Phase Completed</div>
+            <div class="empty-state-desc">This phase has been approved. Click the phase in the sidebar to review its artifact.</div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script>
+const vscode = acquireVsCodeApi();
+
+// ===== STATE =====
+let appState = {
+  apiKey: '',
+  model: 'gemini-2.0-flash',
+  hasWorkspace: false,
+  projectState: null,
+  currentPhaseId: null,
+  isGenerating: false,
+};
+
+const PHASE_DEFS = [
+  { id:1, name:'Identity',     sub:'Vision, Branding & Color Palettes',     icon:'✦', agentLabel:'Identity Agent' },
+  { id:2, name:'Scope',        sub:'Requirements & User Stories',            icon:'◈', agentLabel:'Scope Agent' },
+  { id:3, name:'Skeleton',     sub:'System Architecture & Modules',          icon:'⬡', agentLabel:'Architecture Agent' },
+  { id:4, name:'Contract',     sub:'FastAPI Endpoint Definitions',           icon:'⬢', agentLabel:'API Contract Agent' },
+  { id:5, name:'Validation',   sub:'TDD Step 1: QA Strategy',               icon:'◉', agentLabel:'Validation Agent' },
+  { id:6, name:'Verification', sub:'TDD Step 2: Mocking & Test Patterns',   icon:'◎', agentLabel:'Verification Agent' },
+  { id:7, name:'Data',         sub:'SQLAlchemy Database Modeling',           icon:'◈', agentLabel:'Data Agent' },
+  { id:8, name:'Design',       sub:'Tailwind UI/UX & Animations',           icon:'◇', agentLabel:'Design Agent' },
+  { id:9, name:'Execution',    sub:'Individual Strategy Prompts',            icon:'▷', agentLabel:'Execution Agent' },
+  { id:10, name:'Handoff',     sub:'One-Shot Master Prompt',                icon:'⬟', agentLabel:'Handoff Agent' },
+];
+
+// ===== VS Code Message Handler =====
+window.addEventListener('message', event => {
+  const msg = event.data;
+  switch (msg.type) {
+    case 'init':
+      handleInit(msg);
+      break;
+    case 'stateUpdate':
+      handleStateUpdate(msg.state);
+      showMainScreen();
+      break;
+    case 'phaseGenerating':
+      showGenerating(msg.phaseId);
+      break;
+    case 'phaseReady':
+      handlePhaseReady(msg.phaseId, msg.content, msg.state);
+      break;
+    case 'phaseApproved':
+      handlePhaseApproved(msg.phaseId, msg.state);
+      break;
+    case 'phaseError':
+      handlePhaseError(msg.phaseId, msg.error);
+      break;
+    case 'error':
+      showToast(msg.message, 'error');
+      break;
+  }
+});
+
+function handleInit(msg) {
+  appState.apiKey = msg.apiKey || '';
+  appState.model = msg.model || 'gemini-2.0-flash';
+  appState.hasWorkspace = msg.hasWorkspace;
+
+  updateApiStatus();
+
+  if (msg.existingState) {
+    appState.projectState = msg.existingState;
+    showMainScreen();
+    renderSidebar();
+    updateProgress();
+    // Show current phase state
+    const currentPhase = msg.existingState.phases.find(p => p.status === 'current' || p.id === msg.existingState.currentPhase);
+    if (currentPhase) {
+      selectPhase(currentPhase.id);
+    }
+    document.getElementById('resume-section').style.display = 'block';
+  }
+}
+
+function handleStateUpdate(state) {
+  appState.projectState = state;
+  renderSidebar();
+  updateProgress();
+  updateHeaderTitle();
+  showWelcome();
+}
+
+function handlePhaseReady(phaseId, content, state) {
+  appState.isGenerating = false;
+  if (state) {
+    appState.projectState = state;
+    renderSidebar();
+    updateProgress();
+  }
+  appState.currentPhaseId = phaseId;
+
+  const def = PHASE_DEFS.find(d => d.id === phaseId);
+  const phase = state ? state.phases.find(p => p.id === phaseId) : null;
+
+  hideAllPanels();
+  document.getElementById('phase-panel').style.display = 'flex';
+  updatePhaseHeader(phaseId);
+
+  if (phaseId === 10) {
+    // Special handoff panel
+    document.getElementById('generate-card').style.display = 'none';
+    document.getElementById('handoff-panel').style.display = 'flex';
+    document.getElementById('handoff-editor').value = content || '';
+  } else {
+    document.getElementById('generate-card').style.display = 'none';
+    document.getElementById('review-panel').style.display = 'flex';
+    document.getElementById('artifact-editor').value = content || '';
+    document.getElementById('approve-btn').textContent = phaseId === 9 ? '✓ Approve & Generate Handoff' : `✓ Approve & Proceed to Phase ${phaseId + 1}`;
+  }
+
+  if (def) {
+    document.getElementById('header-title').textContent = def.name;
+    document.getElementById('header-sub').textContent = def.sub;
+    document.getElementById('header-badge-text').textContent = `Phase ${phaseId} — Review`;
+  }
+}
+
+function handlePhaseApproved(phaseId, state) {
+  appState.projectState = state;
+  renderSidebar();
+  updateProgress();
+
+  // Auto-select next phase if exists
+  const nextPhase = state.phases.find(p => p.id === phaseId + 1);
+  if (nextPhase) {
+    selectPhase(nextPhase.id);
+  } else {
+    showWelcome();
+  }
+  showToast(`Phase ${phaseId} approved! ✓`, 'success');
+}
+
+function handlePhaseError(phaseId, error) {
+  appState.isGenerating = false;
+  const def = PHASE_DEFS.find(d => d.id === phaseId);
+  hideAllPanels();
+  document.getElementById('phase-panel').style.display = 'flex';
+  document.getElementById('generate-card').style.display = 'none';
+  document.getElementById('error-panel').style.display = 'flex';
+  document.getElementById('error-msg').textContent = error;
+  updatePhaseHeader(phaseId);
+  renderSidebar();
+}
+
+// ===== SCREEN MANAGEMENT =====
+function showSetupScreen() {
+  document.getElementById('screen-setup').classList.add('active');
+  document.getElementById('screen-main').classList.remove('active');
+}
+
+function showMainScreen() {
+  document.getElementById('screen-setup').classList.remove('active');
+  document.getElementById('screen-main').classList.add('active');
+}
+
+// ===== SETUP ACTIONS =====
+function updateApiStatus() {
+  const dot = document.getElementById('api-status-dot');
+  const text = document.getElementById('api-status-text');
+  if (appState.apiKey) {
+    dot.className = 'status-dot ok';
+    text.textContent = 'API key configured';
+  } else {
+    dot.className = 'status-dot missing';
+    text.textContent = 'API key not set — add in Settings';
+  }
+}
+
+function handleStart() {
+  const name = document.getElementById('setup-name').value.trim();
+  const desc = document.getElementById('setup-desc').value.trim();
+  if (!name) { showToast('Please enter a project name.', 'error'); return; }
+  if (!desc) { showToast('Please describe your project.', 'error'); return; }
+  if (!appState.apiKey) { openModal('settings-modal'); showToast('Please set your Gemini API key first.', 'error'); return; }
+  if (!appState.hasWorkspace) { showToast('Please open a workspace folder in VS Code first.', 'error'); return; }
+  vscode.postMessage({ type: 'initialize', projectName: name, projectDescription: desc });
+}
+
+function handleResume() {
+  if (appState.projectState) showMainScreen();
+}
+
+function handleNewProject() {
+  appState.projectState = null;
+  appState.currentPhaseId = null;
+  showSetupScreen();
+}
+
+// ===== SIDEBAR =====
+function renderSidebar() {
+  const state = appState.projectState;
+  if (!state) return;
+
+  document.getElementById('sidebar-project-title').textContent = state.projectName;
+
+  const list = document.getElementById('phase-list');
+  list.innerHTML = '';
+
+  PHASE_DEFS.forEach((def, i) => {
+    const phase = state.phases.find(p => p.id === def.id);
+    const status = phase ? phase.status : 'pending';
+
+    const node = document.createElement('div');
+    node.className = `phase-node ${status}`;
+    node.dataset.phaseId = def.id;
+    node.onclick = () => selectPhase(def.id);
+
+    const icon = status === 'completed' ? '✓' : status === 'error' ? '!' : def.id;
+
+    node.innerHTML = `
+      <div class="phase-node-indicator">${icon}</div>
+      <div class="phase-node-text">
+        <div class="phase-node-name">${def.name}</div>
+        <div class="phase-node-sub">${def.sub}</div>
+      </div>
+      ${i < PHASE_DEFS.length - 1 ? '<div class="phase-connector"></div>' : ''}
+    `;
+
+    list.appendChild(node);
+  });
+}
+
+function updateProgress() {
+  const state = appState.projectState;
+  if (!state) return;
+  const completed = state.phases.filter(p => p.status === 'completed').length;
+  const pct = (completed / 10) * 100;
+  document.getElementById('sidebar-progress').style.width = pct + '%';
+  document.getElementById('sidebar-progress-label').textContent = `${completed} of 10 phases complete`;
+}
+
+function updateHeaderTitle() {
+  const state = appState.projectState;
+  if (!state) return;
+  document.getElementById('sidebar-project-title').textContent = state.projectName;
+}
+
+// ===== PHASE SELECTION =====
+function selectPhase(phaseId) {
+  appState.currentPhaseId = phaseId;
+  const state = appState.projectState;
+  if (!state) return;
+
+  const phase = state.phases.find(p => p.id === phaseId);
+  const def = PHASE_DEFS.find(d => d.id === phaseId);
+  if (!phase || !def) return;
+
+  // Update header
+  document.getElementById('header-title').textContent = def.name;
+  document.getElementById('header-sub').textContent = def.sub;
+  document.getElementById('header-badge-text').textContent = `Phase ${phaseId}`;
+
+  hideAllPanels();
+  document.getElementById('phase-panel').style.display = 'flex';
+  updatePhaseHeader(phaseId);
+
+  if (phase.status === 'pending') {
+    // Show generate card
+    document.getElementById('generate-card').style.display = 'flex';
+    document.getElementById('generate-title').textContent = `Generate ${def.name} Specification`;
+    document.getElementById('generate-desc').textContent = `Run the ${def.agentLabel} to generate the ${def.sub} artifact.`;
+    document.getElementById('generate-btn').disabled = (phaseId > 1 && !canRunPhase(phaseId));
+
+    if (phaseId > 1 && !canRunPhase(phaseId)) {
+      document.getElementById('generate-desc').textContent = `Complete Phase ${phaseId - 1} first before running this phase.`;
+    }
+  } else if (phase.status === 'current') {
+    // Show generate card — phase is current but hasn't been generated
+    const content = phase.editedArtifact || phase.artifact;
+    if (content) {
+      showReviewForPhase(phaseId, content, phase.status);
+    } else {
+      document.getElementById('generate-card').style.display = 'flex';
+      document.getElementById('generate-title').textContent = `Generate ${def.name} Specification`;
+      document.getElementById('generate-desc').textContent = `Run the ${def.agentLabel} to generate the ${def.sub} artifact.`;
+    }
+  } else if (phase.status === 'completed') {
+    const content = phase.editedArtifact || phase.artifact || '';
+    showReviewForPhase(phaseId, content, 'completed');
+  } else if (phase.status === 'error') {
+    document.getElementById('error-panel').style.display = 'flex';
+    document.getElementById('error-msg').textContent = phase.error || 'Unknown error';
+  }
+}
+
+function showReviewForPhase(phaseId, content, status) {
+  if (phaseId === 10) {
+    document.getElementById('handoff-panel').style.display = 'flex';
+    document.getElementById('handoff-editor').value = content;
+  } else {
+    document.getElementById('review-panel').style.display = 'flex';
+    document.getElementById('artifact-editor').value = content;
+    const nextLabel = phaseId === 9 ? '✓ Approve & Generate Handoff' : `✓ Approve & Proceed to Phase ${phaseId + 1}`;
+    document.getElementById('approve-btn').textContent = status === 'completed' ? '✓ Re-approve' : nextLabel;
+    document.getElementById('approve-btn').disabled = status === 'completed';
+  }
+}
+
+function updatePhaseHeader(phaseId) {
+  const def = PHASE_DEFS.find(d => d.id === phaseId);
+  if (!def) return;
+  document.getElementById('phase-icon').textContent = def.icon;
+  document.getElementById('phase-num').textContent = `PHASE ${phaseId}`;
+  document.getElementById('phase-name').textContent = def.name;
+  document.getElementById('phase-sub').textContent = def.sub;
+  document.getElementById('header-badge-text').textContent = `Phase ${phaseId}`;
+}
+
+function canRunPhase(phaseId) {
+  if (phaseId === 1) return true;
+  const state = appState.projectState;
+  if (!state) return false;
+  const prevPhase = state.phases.find(p => p.id === phaseId - 1);
+  return prevPhase?.status === 'completed';
+}
+
+// ===== ACTIONS =====
+function startCurrentPhase() {
+  const state = appState.projectState;
+  if (!state) return;
+  const currentPhaseId = state.currentPhase || 1;
+  selectPhase(currentPhaseId);
+}
+
+function runCurrentPhase() {
+  const phaseId = appState.currentPhaseId;
+  if (!phaseId) return;
+  vscode.postMessage({ type: 'runPhase', phaseId });
+}
+
+function approvePhase() {
+  const phaseId = appState.currentPhaseId;
+  if (!phaseId) return;
+  const editorId = phaseId === 10 ? 'handoff-editor' : 'artifact-editor';
+  const content = document.getElementById(editorId).value;
+  vscode.postMessage({ type: 'approvePhase', phaseId, editedContent: content });
+}
+
+function regeneratePhase() {
+  const phaseId = appState.currentPhaseId;
+  if (!phaseId) return;
+  vscode.postMessage({ type: 'regeneratePhase', phaseId });
+}
+
+function copyContent() {
+  const phaseId = appState.currentPhaseId;
+  if (!phaseId) return;
+  const editorId = phaseId === 10 ? 'handoff-editor' : 'artifact-editor';
+  const content = document.getElementById(editorId).value;
+  vscode.postMessage({ type: 'copyToClipboard', content });
+}
+
+function openArtifactFile() {
+  const phaseId = appState.currentPhaseId;
+  if (!phaseId) return;
+  vscode.postMessage({ type: 'openArtifact', phaseId });
+}
+
+function invokeHandoff() {
+  vscode.postMessage({ type: 'invokeHandoff' });
+}
+
+function showGenerating(phaseId) {
+  appState.isGenerating = true;
+  appState.currentPhaseId = phaseId;
+  const def = PHASE_DEFS.find(d => d.id === phaseId);
+  document.getElementById('generating-phase-name').textContent = def ? def.agentLabel : `Phase ${phaseId}`;
+  hideAllPanels();
+  document.getElementById('generating-panel').style.display = 'flex';
+  updatePhaseHeader(phaseId);
+}
+
+// ===== UTILS =====
+function hideAllPanels() {
+  ['welcome-panel','generating-panel','review-panel','error-panel','handoff-panel','completed-panel']
+    .forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    });
+  document.getElementById('generate-card').style.display = 'none';
+  document.getElementById('phase-panel').style.display = 'none';
+}
+
+function showWelcome() {
+  hideAllPanels();
+  document.getElementById('welcome-panel').style.display = 'flex';
+  document.getElementById('header-title').textContent = 'Blueprint';
+  document.getElementById('header-sub').textContent = 'Ready to generate specifications';
+  document.getElementById('header-badge-text').textContent = 'Ready';
+}
+
+function showToast(message, type = 'info') {
+  const stack = document.getElementById('toast-stack');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  const icon = type === 'error' ? '⚠' : type === 'success' ? '✓' : 'ℹ';
+  toast.innerHTML = `<span>${icon}</span><span>${message}</span>`;
+  stack.appendChild(toast);
+  setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = '0.3s'; setTimeout(() => toast.remove(), 300); }, 4000);
+}
+
+// ===== SETTINGS MODAL =====
+function openModal(id) {
+  document.getElementById(id).classList.add('active');
+  if (id === 'settings-modal') {
+    document.getElementById('modal-api-key').value = appState.apiKey || '';
+    document.getElementById('modal-model').value = appState.model || 'gemini-2.0-flash';
+  }
+}
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+function saveSettings() {
+  const key = document.getElementById('modal-api-key').value.trim();
+  const model = document.getElementById('modal-model').value;
+  appState.apiKey = key;
+  appState.model = model;
+  vscode.postMessage({ type: 'updateApiKey', apiKey: key });
+  closeModal('settings-modal');
+  updateApiStatus();
+  showToast('Settings saved!', 'success');
+}
+
+// ===== INIT =====
+// Tell extension we're ready
+vscode.postMessage({ type: 'ready' });
+
+// Determine which screen to show on load
+showSetupScreen();
+</script>
+</body>
+</html>
