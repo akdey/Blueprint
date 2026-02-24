@@ -78,13 +78,15 @@
             "gemini",
             "openai",
             "groq",
-            "azure-openai"
+            "azure-openai",
+            "litellm"
           ],
           "enumDescriptions": [
             "Google Gemini (gemini-2.0-flash, gemini-1.5-pro, etc.)",
             "OpenAI (gpt-4o, gpt-4-turbo, gpt-3.5-turbo, etc.)",
             "Groq (llama-3.3-70b, mixtral-8x7b, etc.) — ultra-fast inference",
-            "Azure OpenAI — your deployed Azure OpenAI resource"
+            "Azure OpenAI — your deployed Azure OpenAI resource",
+            "LiteLLM — Connect to any model via a LiteLLM proxy"
           ],
           "markdownDescription": "The LLM provider to use for all Blueprint agents.\n\nConfigure credential fields for the chosen provider below.",
           "order": 1
@@ -180,6 +182,24 @@
           ],
           "markdownDescription": "**Azure OpenAI API Version** — use the latest preview version for best features.",
           "order": 43
+        },
+        "blueprint.litellm.apiKey": {
+          "type": "string",
+          "default": "sk-none",
+          "markdownDescription": "**LiteLLM API Key** — Optional if your proxy doesn't require one.\n\n_Used when `blueprint.provider` is `litellm`._",
+          "order": 50
+        },
+        "blueprint.litellm.model": {
+          "type": "string",
+          "default": "gpt-4o",
+          "markdownDescription": "**LiteLLM Model ID** — The name of the model as configured in your LiteLLM proxy.",
+          "order": 51
+        },
+        "blueprint.litellm.baseUrl": {
+          "type": "string",
+          "default": "http://localhost:4000/v1",
+          "markdownDescription": "**LiteLLM Base URL** — The URL of your running LiteLLM proxy (usually http://localhost:4000/v1).",
+          "order": 52
         }
       }
     }

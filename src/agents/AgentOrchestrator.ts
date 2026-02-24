@@ -218,6 +218,11 @@ Ordered sequence the coder must follow:
 
 ## 12. Acceptance Criteria
 [List of SPECIFIC, testable conditions — maps back to user stories]
+
+## 13. Mandatory Traceability Map
+- **CRITICAL**: Before finishing, you MUST create a \`TRACEABILITY.md\` file in the project root.
+- **Content**: Map every User Story and Requirement from Section 2 to the exact file paths and function/class names that implement them.
+- **Purpose**: To ensure 100% scope coverage and maintainability.
 ---
 
 ${COMMON_DIRECTIVES}

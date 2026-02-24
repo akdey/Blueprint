@@ -96,6 +96,9 @@ export class BlueprintViewProvider implements vscode.WebviewViewProvider {
             azureEndpoint: c.get<string>('azure.endpoint', ''),
             azureDeploymentName: c.get<string>('azure.deploymentName', ''),
             azureApiVersion: c.get<string>('azure.apiVersion', '2024-08-01-preview'),
+            litellmApiKey: c.get<string>('litellm.apiKey', 'sk-none'),
+            litellmModel: c.get<string>('litellm.model', 'gpt-4o'),
+            litellmBaseUrl: c.get<string>('litellm.baseUrl', 'http://localhost:4000/v1'),
         };
     }
 
@@ -105,6 +108,7 @@ export class BlueprintViewProvider implements vscode.WebviewViewProvider {
             'openai': { label: 'OpenAI', model: cfg.openaiModel || 'gpt-4o' },
             'groq': { label: 'Groq', model: cfg.groqModel || 'llama-3.3-70b-versatile' },
             'azure-openai': { label: 'Azure OpenAI', model: cfg.azureDeploymentName || '(not configured)' },
+            'litellm': { label: 'LiteLLM', model: cfg.litellmModel || 'gpt-4o' },
         };
         return { provider: cfg.provider, ...map[cfg.provider] };
     }

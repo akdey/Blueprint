@@ -8,7 +8,7 @@
 
 [![VS Code](https://img.shields.io/badge/VS%20Code-1.85+-blue?logo=visual-studio-code)](https://code.visualstudio.com/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178c6?logo=typescript)](https://www.typescriptlang.org/)
-[![LLM Providers](https://img.shields.io/badge/LLM-Gemini%20%7C%20OpenAI%20%7C%20Groq%20%7C%20Azure-orange)](https://openai.com)
+[![LLM Providers](https://img.shields.io/badge/LLM-Gemini%20%7C%20OpenAI%20%7C%20Groq%20%7C%20Azure%20%7C%20LiteLLM-orange)](https://openai.com)
 [![License](https://img.shields.io/badge/license-Proprietary-red)](LICENSE)
 
 </div>
@@ -51,7 +51,7 @@ You open an AI chat and describe your idea. You get... a half-baked wireframe, a
 
 Blueprint runs **8 specialized AI agents** in sequence, each deeply focused on one layer of your application — from brand identity to database schema to the final one-shot build prompt. Every agent **reads every prior phase's approved output**, ensuring nothing is contradictory, nothing is forgotten.
 
-The result: a `08_handoff.md` file that contains **the complete blueprint of your application** — ready to paste into Antigravity, Copilot, Claude, or hand to a developer.
+The result: a `08_handoff.md` file that contains **the complete blueprint of your application** — including a mandatory **Traceability Matrix** directive to ensure 100% feature coverage. Ready to paste into Antigravity, Copilot, Claude, or hand to a developer.
 
 ---
 
@@ -123,8 +123,8 @@ Every agent is instructed to produce code with:
 
 The handoff brief doesn't just tell someone *what* to build — it tells them *why* every decision was made.
 
-### 🔌 4 LLM Providers — Your Key, Your Choice
-No subscription. No middleman. Bring your own API key. Supports **Google Gemini** (2.0 Flash/1.5 Pro), **OpenAI**, **Groq** (fastest), and **Azure OpenAI**.
+### 🔌 Multi-LLM Support — Your Key, Your Choice
+No subscription. No middleman. Bring your own API key. Supports **Google Gemini** (2.0 Flash/1.5 Pro), **OpenAI**, **Groq** (fastest), **Azure OpenAI**, and **LiteLLM** (connect to anything).
 
 ---
 

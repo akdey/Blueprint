@@ -8,7 +8,7 @@ import * as http from 'http';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-export type LLMProvider = 'gemini' | 'openai' | 'groq' | 'azure-openai';
+export type LLMProvider = 'gemini' | 'openai' | 'groq' | 'azure-openai' | 'litellm';
 
 export interface LLMConfig {
     provider: LLMProvider;
@@ -27,6 +27,10 @@ export interface LLMConfig {
     azureEndpoint?: string;
     azureDeploymentName?: string;
     azureApiVersion?: string;
+    // LiteLLM
+    litellmApiKey?: string;
+    litellmModel?: string;
+    litellmBaseUrl?: string;
 }
 
 export interface LLMClient {
@@ -62,6 +66,12 @@ export function createLLMClient(config: LLMConfig): LLMClient {
                 config.azureDeploymentName || '',
                 config.azureApiVersion || '2024-08-01-preview'
             );
+        case 'litellm':
+            return new OpenAIClient(
+                config.litellmApiKey || 'sk-none',
+                config.litellmModel || 'gpt-4o',
+                config.litellmBaseUrl || 'http://localhost:4000/v1'
+            );
         default:
             throw new Error(`Unknown LLM provider: ${config.provider}`);
     }
@@ -82,6 +92,9 @@ export function validateConfig(config: LLMConfig): string | null {
             if (!config.azureApiKey) return 'Azure OpenAI API key is required. Add it in Blueprint settings.';
             if (!config.azureEndpoint) return 'Azure OpenAI endpoint is required. Add it in Blueprint settings.';
             if (!config.azureDeploymentName) return 'Azure deployment name is required. Add it in Blueprint settings.';
+            return null;
+        case 'litellm':
+            if (!config.litellmBaseUrl) return 'LiteLLM base URL is required. Add it in Blueprint settings.';
             return null;
     }
 }
