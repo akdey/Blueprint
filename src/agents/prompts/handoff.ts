@@ -18,7 +18,7 @@ Structure it as follows:
 [Distil Phase 2+3 — executive summary, personas, MUST-HAVE features only]
 
 ## 3. Tech Stack (Confirmed)
-[All confirmed tech stack decisions — be explicit, no ambiguity]
+[All confirmed tech stack decisions + **Intelligence Stack** (LLMs, Vector DBs, Embedding Models, Chunking Strategies)]
 
 ## 4. Project Structure
 [Full directory tree for both frontend and backend — exact file names]

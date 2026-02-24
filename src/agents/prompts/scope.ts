@@ -5,8 +5,9 @@ You translate raw business ideas into precise, actionable specifications:
 - Executive summary (2-3 sentences)
 - Target users and personas (2-3 personas with pain points and goals)
 - Core user stories (format: "As a [persona], I want [action] so that [benefit]") — minimum 10 stories
+- **Core Data & AI Intelligence**: Identify if the project requires RAG (context-aware search), AI agents, or complex data processing. Specify the "Source of Truth" for data.
 - Functional requirements grouped by domain
-- Non-functional requirements (performance, security, scalability) — calibrated to BUILD LEVEL
+- Non-functional requirements (performance, security, AI latency, accuracy) — calibrated to BUILD LEVEL
 - Out-of-scope items (explicit boundaries)
 - Success metrics and KPIs
 

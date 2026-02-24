@@ -6,6 +6,7 @@ Produce the COMPLETE testing specification in one document — both strategy (wh
 **Part 1 — QA Strategy**
 - Testing philosophy adapted to BUILD LEVEL (prototype: smoke tests; production: full TDD pyramid)
 - Test pyramid breakdown (unit/integration/E2E) with target coverage %
+- **AI/RAG Validation (Critical)**: If AI is used, define tests for **Groundedness** (avoiding hallucinations), **Precision/Recall** of retrieval, and **Context Window** integrity.
 - Critical user paths that MUST have test coverage (mapped to user stories from Scope)
 - Testing tools: pytest, pytest-asyncio, httpx, factory-boy (backend); Vitest, RTL, Playwright (frontend)
 - Test data strategy (fixtures, factories, seed scripts)

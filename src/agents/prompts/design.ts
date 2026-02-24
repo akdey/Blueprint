@@ -6,6 +6,7 @@ Create a complete design specification:
 - Color tokens mapped to CSS custom props / Tailwind config extensions
 - Typography scale and configuration
 - Component library specification (every component the app needs)
+- **AI/Intelligence UX**: If AI is used, design components for **Source Citations** (showing where data came from), **Reasoning Traces** (showing how AI got the answer), and **Streaming Feedback**.
 - For each KEY component (at least 6): purpose, props, variants, states, class breakdown
 - Layout system (grid, breakpoints, container strategy)
 - Animation & micro-interaction catalogue (Framer Motion / CSS animation patterns)
