@@ -16,6 +16,15 @@ import * as HandoffPrompt from './prompts/handoff';
 
 export type AgentProgressCallback = (phase: number, status: string, content?: string) => void;
 
+// Context budgets per provider (in characters, based on free/standard tier TPM limits)
+const PROVIDER_CONTEXT_LIMITS: Record<string, number> = {
+    'groq': 24_000,      // ~6K tokens (Groq 12K TPM limit)
+    'gemini': 100_000,   // ~25K tokens (Gemini 1M token window)
+    'openai': 100_000,   // ~25K tokens (GPT-4o 128K token window)
+    'azure': 100_000,
+    'litellm': 100_000
+};
+
 export class AgentOrchestrator {
     private client: LLMClient;
     private stateManager: ProjectStateManager;
@@ -54,7 +63,13 @@ export class AgentOrchestrator {
         } else {
             // Smart path — applies per-phase context policy + enforces provider-specific char budget
             const providerName = this.client.getLabel().toLowerCase();
-            const maxChars = providerName.includes('groq') ? 24_000 : 100_000;
+            let maxChars = 100_000; // default safe fallback
+            for (const [key, limit] of Object.entries(PROVIDER_CONTEXT_LIMITS)) {
+                if (providerName.includes(key)) {
+                    maxChars = limit;
+                    break;
+                }
+            }
             context = await this.stateManager.buildSmartContext(phaseId, this.compressor, maxChars);
         }
 
