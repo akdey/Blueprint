@@ -13,6 +13,7 @@ import * as TestingPrompt from './prompts/testing';
 import * as DataPrompt from './prompts/data';
 import * as DesignPrompt from './prompts/design';
 import * as HandoffPrompt from './prompts/handoff';
+import * as SeedingPrompt from './prompts/seeding';
 
 export type AgentProgressCallback = (phase: number, status: string, content?: string) => void;
 
@@ -95,6 +96,7 @@ export class AgentOrchestrator {
             case 'database': return DataPrompt.SYSTEM_PROMPT;
             case 'ui': return DesignPrompt.SYSTEM_PROMPT;
             case 'handoff': return HandoffPrompt.SYSTEM_PROMPT;
+            case 'seeding': return SeedingPrompt.SYSTEM_PROMPT;
             default: return '';
         }
     }

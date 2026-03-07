@@ -46,11 +46,12 @@ export const PHASE_DEFINITIONS = [
     { id: 1, name: 'Identity', subtitle: 'Vision, Branding & Color Palettes', icon: '✦', agentType: 'branding', artifactFile: '01_identity.md' },
     { id: 2, name: 'Scope', subtitle: 'Requirements & User Stories', icon: '◈', agentType: 'requirements', artifactFile: '02_scope.md' },
     { id: 3, name: 'Skeleton', subtitle: 'System Architecture & Modules', icon: '⬡', agentType: 'architecture', artifactFile: '03_skeleton.md' },
-    { id: 4, name: 'Contract', subtitle: 'FastAPI Endpoint Definitions', icon: '⬢', agentType: 'api', artifactFile: '04_contract.md' },
+    { id: 4, name: 'Contract', subtitle: 'API Endpoint Definitions', icon: '⬢', agentType: 'api', artifactFile: '04_contract.md' },
     { id: 5, name: 'Testing', subtitle: 'TDD Strategy + Mocking Patterns', icon: '◉', agentType: 'testing', artifactFile: '05_testing.md' },
-    { id: 6, name: 'Data', subtitle: 'SQLAlchemy Database Modeling', icon: '◈', agentType: 'database', artifactFile: '06_data.md' },
+    { id: 6, name: 'Data', subtitle: 'Database Modeling', icon: '◈', agentType: 'database', artifactFile: '06_data.md' },
     { id: 7, name: 'Design', subtitle: 'UI/UX, Wow Factor & Animations', icon: '◇', agentType: 'ui', artifactFile: '07_design.md' },
     { id: 8, name: 'Handoff', subtitle: 'One-Shot Master Prompt', icon: '⬟', agentType: 'handoff', artifactFile: '08_handoff.md' },
+    { id: 9, name: 'Seeding', subtitle: 'Mock Data Generation', icon: '🌿', agentType: 'seeding', artifactFile: '09_seeding.md' },
 ];
 
 const STATE_KEY = 'blueprint.projectState';

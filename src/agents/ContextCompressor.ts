@@ -24,7 +24,7 @@ const HEADLINE_MAX_CHARS = 400;     // Characters kept per headline-only phase
 
 // ── Phase context policy ──────────────────────────────────────────────────────
 // For each target phase, defines which prior phases get each treatment tier.
-// phaseId 1-8 → { verbatim: number[], compressed: number[], headline: number[] }
+// phaseId 1-9 → { verbatim: number[], compressed: number[], headline: number[] }
 const PHASE_CONTEXT_POLICY: Record<number, { verbatim: number[]; compressed: number[]; headline: number[] }> = {
     1: { verbatim: [], compressed: [], headline: [] },
     2: { verbatim: [1], compressed: [], headline: [] },
@@ -34,6 +34,7 @@ const PHASE_CONTEXT_POLICY: Record<number, { verbatim: number[]; compressed: num
     6: { verbatim: [3, 4], compressed: [1, 2], headline: [] },
     7: { verbatim: [1, 3], compressed: [2, 4], headline: [5, 6] },
     8: { verbatim: [6, 7], compressed: [3, 4, 5], headline: [1, 2] },
+    9: { verbatim: [2, 4, 6], compressed: [3, 8], headline: [1, 5, 7] }, // Seeding needs Scope, APIs, and DB Models most
 };
 
 // ── LLMLingua-2 dynamic import (graceful — may fail in restrictive environments) ─
