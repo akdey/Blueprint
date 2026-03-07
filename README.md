@@ -62,13 +62,13 @@ You open an AI chat and describe your idea. You get... a half-baked wireframe, a
 
 ## ✨ What Blueprint Does
 
-Blueprint runs **8 specialized AI agents** in sequence, each deeply focused on one layer of your application — from brand identity to database schema to the final one-shot build prompt. Every agent **reads every prior phase's approved output**, ensuring nothing is contradictory, nothing is forgotten.
+Blueprint runs **9 specialized AI agents** in sequence, each deeply focused on one layer of your application — from brand identity to database schema to the final one-shot build prompt. Every agent **reads every prior phase's approved output**, ensuring nothing is contradictory, nothing is forgotten.
 
-The result: a `08_handoff.md` file that contains **the complete blueprint of your application** — including a mandatory **Traceability Matrix** directive to ensure 100% feature coverage. Ready to paste into Antigravity, Copilot, Claude, or hand to a developer.
+The result: a `08_handoff.md` file that contains **the complete blueprint of your application** — including a mandatory **Traceability Matrix** directive to ensure 100% feature coverage. Ready to paste into Antigravity, Copilot, Claude, or hand to a developer. Optionally, run the 9th phase to generate mock data or RAG documents.
 
 ---
 
-## 🚀 The 8-Phase Workflow
+## 🚀 The 9-Phase Workflow
 
 ```
 ⚡ PROTOTYPE  ──  🚀 MVP  ──  🏭 PRODUCTION
@@ -82,11 +82,12 @@ The result: a `08_handoff.md` file that contains **the complete blueprint of you
 | **1** | ✦ **Identity** | Brand mission, color palette (hex), typography, logo concept, taglines |
 | **2** | ◈ **Scope** | User personas, 10+ user stories, functional requirements, KPIs |
 | **3** | ⬡ **Skeleton** | ASCII architecture diagram, full directory tree, data flow, design patterns |
-| **4** | ⬢ **Contract** | Every FastAPI endpoint — method, path, Pydantic schemas, auth, error codes |
+| **4** | ⬢ **Contract** | Every API endpoint — method, path, validation schemas, auth, error codes |
 | **5** | ◉ **Testing** | TDD strategy + executable test patterns (pytest + Vitest + Playwright) |
-| **6** | ◈ **Data** | SQLAlchemy ORM models, ER diagram, migration strategy, indexed queries |
-| **7** | ◇ **Design** | Component library, Tailwind tokens, Framer Motion catalogue, **✨ Wow Factor** |
+| **6** | ◈ **Data** | Database ORM models, ER diagram, migration strategy, indexed queries |
+| **7** | ◇ **Design** | Component library, CSS/Tailwind tokens, UI/UX, **✨ Wow Factor** |
 | **8** | ⬟ **Handoff** | One-shot build brief — all artifacts embedded, step-by-step build order |
+| **9** | 🌿 **Seeding** | *(Optional)* Executable DB seed scripts (Faker) or Domain-Specific RAG Mock Documents |
 
 ---
 
@@ -123,9 +124,9 @@ The Design phase (Phase 7) is uniquely structured to produce a **"✨ Wow Factor
 
 ### 🧠 Smart Context + LLMLingua2 Compression
 Every agent gets exactly the context it needs — no more token overflows on later phases.
+- **Provider-Specific Token Budgets**: Dynamically allocates massive 100K character budgets for Gemini/OpenAI, and strict 24K limits for Groq to prevent TPM rate limits.
 - **Phase-Aware Policy**: Each agent receives full verbatim context for the 2 most recent phases, LLMLingua2-compressed context for older phases, and headline-only snippets for the oldest.
 - **LLMLingua2 (Microsoft, JS/Node port)**: Uses a BERT-sized token classifier to compress older phase artifacts by 50% while preserving semantic meaning.
-- **48K char budget**: Total context per agent is capped at ~12K tokens, keeping all providers well within their context windows.
 - **Graceful fallback**: If LLMLingua2 hasn't loaded yet, a deterministic compressor (header + first-sentence extraction) kicks in automatically.
 
 ### 🎨 Real Website Branding Extraction (Identity Agent)
@@ -166,7 +167,8 @@ Every phase writes a `.md` file to `.blueprint/` in your workspace:
 ├── 05_testing.md
 ├── 06_data.md
 ├── 07_design.md   (Wow Factor injected here)
-└── 08_handoff.md    (The 1-Step Build Prompt)
+├── 08_handoff.md  (The 1-Step Build Prompt)
+└── 09_seeding.md  (Mock DB Scripts / RAG Docs)
 ```
 
 ---
@@ -200,10 +202,10 @@ Blueprint VS Code Extension
 │   │   ├── BlueprintViewProvider.ts  — Webview controller, all message handlers
 │   │   └── BlueprintPanelManager.ts — (stub, sidebar is primary UI)
 │   ├── agents/
-│   │   ├── AgentOrchestrator.ts  — 8 specialized phases + smart context routing
+│   │   ├── AgentOrchestrator.ts  — 9 specialized phases + smart context routing
 │   │   ├── ContextCompressor.ts  — LLMLingua2 + deterministic fallback compressor
 │   │   ├── LLMClient.ts          — Multi-provider LLM client (Gemini/OpenAI/Groq/Azure)
-│   │   └── prompts/              — 8 agent prompts (cache-friendly static system prompts)
+│   │   └── prompts/              — 9 agent prompts (cache-friendly static system prompts)
 │   └── state/
 │       └── ProjectStateManager.ts — State, artifact persistence, buildContext + buildSmartContext
 │
