@@ -231,10 +231,10 @@ export class ProjectStateManager {
      * - Recent phases: verbatim
      * - Middle phases: LLMLingua2 semantic compression (or deterministic fallback)
      * - Oldest phases: headline only
-     * Total budget: ~48,000 chars (~12K tokens)
+     * Total budget: maxChars
      * This method is async because LLMLingua2 compression is async.
      */
-    async buildSmartContext(upToPhase: number, compressor: import('../agents/ContextCompressor').ContextCompressor): Promise<string> {
+    async buildSmartContext(upToPhase: number, compressor: import('../agents/ContextCompressor').ContextCompressor, maxChars: number): Promise<string> {
         if (!this.state) return '';
 
         // ── Static prefix (ALWAYS included — this is the cache-stable part) ────
@@ -283,7 +283,7 @@ export class ProjectStateManager {
             }
         }
 
-        const compressedArtifacts = await compressor.buildBudgetedContext(upToPhase, artifactMap);
+        const compressedArtifacts = await compressor.buildBudgetedContext(upToPhase, artifactMap, maxChars);
 
         return prefix + compressedArtifacts;
     }

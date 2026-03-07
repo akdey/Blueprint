@@ -52,8 +52,10 @@ export class AgentOrchestrator {
             // Legacy path — no compression needed, phases are early and context is small
             context = this.stateManager.buildContext(phaseId);
         } else {
-            // Smart path — applies per-phase context policy + enforces 48K char budget
-            context = await this.stateManager.buildSmartContext(phaseId, this.compressor);
+            // Smart path — applies per-phase context policy + enforces provider-specific char budget
+            const providerName = this.client.getLabel().toLowerCase();
+            const maxChars = providerName.includes('groq') ? 24_000 : 100_000;
+            context = await this.stateManager.buildSmartContext(phaseId, this.compressor, maxChars);
         }
 
         const userPrompt = this.buildUserPrompt(phaseId, state.projectName, state.projectDescription, context);

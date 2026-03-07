@@ -19,7 +19,6 @@
  */
 
 // ── Constants ─────────────────────────────────────────────────────────────────
-const MAX_CONTEXT_CHARS = 24_000;   // ~6K tokens — safely below Groq's 12K TPM free-tier limit
 const COMPRESS_RATIO = 0.50;        // Target 50% token reduction via LLMLingua2
 const HEADLINE_MAX_CHARS = 400;     // Characters kept per headline-only phase
 
@@ -114,15 +113,17 @@ export class ContextCompressor {
     /**
      * Smart context budgeter.
      * Takes the full set of prior phase artifacts and applies the policy for the
-     * target phase, then enforces the total MAX_CONTEXT_CHARS budget.
+     * target phase, then enforces the provided maxChars budget.
      *
      * @param upToPhase  The phase we are about to run (1-8)
      * @param artifacts  Map of phaseId → { name: string, content: string }
+     * @param maxChars   The maximum allowed characters (based on LLM provider limit)
      * @returns Compressed context string ready to inject into the user prompt
      */
     async buildBudgetedContext(
         upToPhase: number,
-        artifacts: Map<number, { name: string; subtitle: string; content: string }>
+        artifacts: Map<number, { name: string; subtitle: string; content: string }>,
+        maxChars: number
     ): Promise<string> {
         const policy = PHASE_CONTEXT_POLICY[upToPhase] ?? { verbatim: [], compressed: [], headline: [] };
         const sections: Array<{ phaseId: number; label: string; content: string }> = [];
@@ -147,7 +148,7 @@ export class ContextCompressor {
         }
 
         // Enforce total budget — trim from oldest first if over budget
-        return this._enforceBudget(sections, MAX_CONTEXT_CHARS);
+        return this._enforceBudget(sections, maxChars);
     }
 
     // ── Private helpers ────────────────────────────────────────────────────────
