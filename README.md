@@ -7,6 +7,7 @@
 **Blueprint is a VS Code extension that acts as a team of elite AI agents,** each specializing in one phase of software design. You describe your app, Blueprint runs 8 sequential agents, and you get a battle-tested, fully-commented, one-shot build brief that any developer or AI coding assistant can execute immediately.
 
 [![VS Code](https://img.shields.io/badge/VS%20Code-1.85+-blue?logo=visual-studio-code)](https://code.visualstudio.com/)
+[![Version](https://img.shields.io/badge/version-0.2.0-brightgreen)](https://github.com/akdey/Blueprint/raw/main/blueprint-0.2.0.vsix)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178c6?logo=typescript)](https://www.typescriptlang.org/)
 [![LLM Providers](https://img.shields.io/badge/LLM-Gemini%20%7C%20OpenAI%20%7C%20Groq%20%7C%20Azure%20%7C%20LiteLLM-orange)](https://openai.com)
 [![License](https://img.shields.io/badge/license-Proprietary-red)](LICENSE)
@@ -19,9 +20,21 @@
 
 **Get Blueprint running in 30 seconds:**
 
-1.  **Download the Extension**: [**Click here to download `blueprint-0.1.0.vsix`**](https://github.com/akdey/Blueprint/raw/main/blueprint-0.1.0.vsix)
+1.  **Download the Extension**: [**Click here to download `blueprint-0.2.0.vsix`**](https://github.com/akdey/Blueprint/raw/main/blueprint-0.2.0.vsix)
 2.  **Install in VS Code**: Open VS Code → Extensions (`Ctrl+Shift+X`) → Click the `...` in the top right → **Install from VSIX...** → Select the downloaded file.
 3.  **Activate**: Click the ⬟ icon in your Activity Bar.
+
+---
+
+## 🆕 What's New in v0.2.0
+
+| | Feature | Impact |
+|---|---|---|
+| 🗜️ | **LLMLingua2 Context Compression** | Phases 4–8 no longer hit token limits — older artifacts are semantically compressed |
+| 🎨 | **Real CSS Branding Scraper** | Fetches actual linked stylesheets and extracts `--color-*`, `@font-face`, hex tokens |
+| 📝 | **9× Deeper Agent Prompts** | All 8 agents now have mandatory numbered output sections with exact code/table formats |
+| 🧠 | **Two-Dimensional Wow Factor** | Solution Intelligence (sentiment analysis, anomaly detection, etc.) + UI/UX Delight |
+| 🚀 | **Cache-Friendly Prompts** | 100% static system prompts enable Gemini/OpenAI prefix caching |
 
 ---
 
