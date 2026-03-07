@@ -87,7 +87,7 @@ The result: a `08_handoff.md` file that contains **the complete blueprint of you
 | **6** | ◈ **Data** | Database ORM models, ER diagram, migration strategy, indexed queries |
 | **7** | ◇ **Design** | Component library, CSS/Tailwind tokens, UI/UX, **✨ Wow Factor** |
 | **8** | ⬟ **Handoff** | One-shot build brief — all artifacts embedded, step-by-step build order |
-| **9** | 🌿 **Seeding** | *(Optional)* Executable DB seed scripts (Faker) or Domain-Specific RAG Mock Documents |
+| **9** | 🌿 **Seeding** | *(Optional)* DB seed scripts honoring foreign-keys, or Domain-Specific RAG Mock Docs |
 
 ---
 
