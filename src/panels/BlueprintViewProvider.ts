@@ -225,16 +225,141 @@ export class BlueprintViewProvider implements vscode.WebviewViewProvider {
 
     private async _fetchBrandingBg(clientName: string, url: string, client: any): Promise<void> {
         try {
+            // Step 1: Fetch the main HTML page
             const html = await this._fetchUrl(url);
             if (!html) return;
-            const signals = this._extractBrandSignals(html);
+
+            // Step 2: Discover and fetch linked external stylesheets (the real brand tokens)
+            const cssUrls = this._extractLinkedStylesheets(html, url);
+            const externalCss = await this._fetchExternalCss(cssUrls);
+
+            // Step 3: Extract all brand signals from HTML + external CSS combined
+            const signals = this._extractBrandSignals(html, externalCss);
+
             const branding = await client.generate(
-                'You are a brand analyst. Be concise, max 200 words.',
-                `Extract the brand identity of "${clientName}" from this HTML. List: primary/secondary colors (hex if visible), fonts, visual style, tone.\n\n${signals}`
+                'You are a brand analyst. Respond in structured Markdown, max 300 words.',
+                `Extract the brand identity of "${clientName}" from these web signals.\n` +
+                `List: primary/secondary/accent colors (hex), font families, design style (minimal/bold/etc), brand tone (formal/casual).\n` +
+                `Also extract ANY CSS custom properties (--color-*, --font-*, --brand-*) found in the signals.\n\n${signals}`
             );
             await this._stateManager.updateClientBranding(branding);
-            this._post({ type: 'toast', text: `✓ ${clientName} brand context loaded`, variant: 'success' });
+            this._post({ type: 'toast', text: `✓ ${clientName} brand context loaded from website`, variant: 'success' });
         } catch (_) { /* silent — branding is optional */ }
+    }
+
+    /**
+     * Extracts all <link rel="stylesheet"> hrefs from HTML and resolves them to absolute URLs.
+     * Caps at 5 URLs to avoid fetching bloated CSS bundles.
+     */
+    private _extractLinkedStylesheets(html: string, baseUrl: string): string[] {
+        const base = new URL(baseUrl);
+        const urls: string[] = [];
+
+        // Match <link rel="stylesheet" href="..."> (order-insensitive attrs)
+        const linkPattern = /<link[^>]+rel=["']stylesheet["'][^>]*href=["']([^"']+)["'][^>]*>|<link[^>]+href=["']([^"']+)["'][^>]+rel=["']stylesheet["'][^>]*>/gi;
+        let match: RegExpExecArray | null;
+        while ((match = linkPattern.exec(html)) !== null && urls.length < 5) {
+            const href = (match[1] || match[2] || '').trim();
+            if (!href || href.startsWith('data:')) continue;
+            try {
+                const resolved = new URL(href, base).toString();
+                // Only include CSS from same origin or common CDNs (fonts, etc.)
+                urls.push(resolved);
+            } catch { /* skip malformed hrefs */ }
+        }
+        return urls;
+    }
+
+    /**
+     * Fetches up to 3 CSS files in parallel, each capped at 30KB.
+     * Uses individual 5-second timeouts per file to avoid hanging.
+     */
+    private async _fetchExternalCss(urls: string[]): Promise<string[]> {
+        const MAX_CSS_FILES = 3;
+        const MAX_CSS_BYTES = 30_000; // 30KB per file — enough to capture all custom properties
+
+        const fetches = urls.slice(0, MAX_CSS_FILES).map(url =>
+            new Promise<string>(resolve => {
+                const timeout = setTimeout(() => resolve(''), 5000);
+                try {
+                    const mod = url.startsWith('https') ? https : http;
+                    let data = '';
+                    (mod as typeof https).get(url, { headers: { 'User-Agent': 'Mozilla/5.0' } } as any, (res: any) => {
+                        res.on('data', (chunk: any) => {
+                            data += chunk;
+                            if (data.length > MAX_CSS_BYTES) res.destroy();
+                        });
+                        res.on('end', () => { clearTimeout(timeout); resolve(data); });
+                        res.on('error', () => { clearTimeout(timeout); resolve(''); });
+                    }).on('error', () => { clearTimeout(timeout); resolve(''); });
+                } catch { clearTimeout(timeout); resolve(''); }
+            })
+        );
+
+        return Promise.all(fetches);
+    }
+
+    /**
+     * Extracts brand signals from HTML and any fetched external CSS files.
+     * Scans for: CSS custom properties, @font-face, meta tags, inline styles.
+     */
+    private _extractBrandSignals(html: string, externalCss: string[] = []): string {
+        const out: string[] = [];
+        const allCss = externalCss.join('\n');
+
+        // ── Meta tags ────────────────────────────────────────────────────────────
+        const themeColor = html.match(/<meta[^>]+name="theme-color"[^>]+content="([^"]+)"/i);
+        if (themeColor) out.push(`Theme color: ${themeColor[1]}`);
+
+        const ogTitle = html.match(/<meta[^>]+property="og:title"[^>]+content="([^"]+)"/i);
+        if (ogTitle) out.push(`Brand title: ${ogTitle[1]}`);
+
+        const ogDesc = html.match(/<meta[^>]+property="og:description"[^>]+content="([^"]+)"/i);
+        if (ogDesc) out.push(`Brand description: ${ogDesc[1]}`);
+
+        // ── Google Fonts (inline HTML) ────────────────────────────────────────────
+        const fonts = html.match(/fonts\.googleapis\.com[^"]+family=([^"&]+)/g);
+        if (fonts?.length) out.push(`Google Fonts (HTML): ${fonts.slice(0, 5).join(', ')}`);
+
+        // ── Google Fonts (external CSS @import) ───────────────────────────────────
+        const cssGFonts = allCss.match(/fonts\.googleapis\.com[^"')]+family=([^"')&]+)/g);
+        if (cssGFonts?.length) out.push(`Google Fonts (CSS): ${cssGFonts.slice(0, 5).join(', ')}`);
+
+        // ── @font-face declarations ───────────────────────────────────────────────
+        const fontFaces = allCss.match(/@font-face\s*\{[^}]+font-family:\s*([^;"']+)/gi);
+        if (fontFaces?.length) {
+            const families = fontFaces.slice(0, 4).map(ff => ff.replace(/@font-face[^family]+font-family:\s*/i, '').trim());
+            out.push(`@font-face families: ${families.join(', ')}`);
+        }
+
+        // ── CSS custom properties from EXTERNAL stylesheets (the gold mine) ─────
+        const allCssVars = [
+            // Color-related variables
+            ...(allCss.match(/--[\w-]*(?:color|bg|background|primary|secondary|accent|brand|theme|text|foreground|surface)[\w-]*\s*:\s*[^;]{3,40}/gi) || []),
+            // Font-related variables
+            ...(allCss.match(/--[\w-]*(?:font|type|heading|body)[\w-]*\s*:\s*[^;]{3,60}/gi) || []),
+        ];
+        if (allCssVars.length) {
+            out.push(`CSS custom properties (external stylesheets):\n${allCssVars.slice(0, 30).join('\n')}`);
+        }
+
+        // ── CSS custom properties from INLINE styles ──────────────────────────────
+        const inlineStyleTag = html.match(/<style[^>]*>([\s\S]{0,3000})/i);
+        if (inlineStyleTag) {
+            const inlineVars = inlineStyleTag[1].match(/--[\w-]*(?:color|bg|primary|secondary|accent|brand)[\w-]*\s*:\s*[^;]{3,40}/gi);
+            if (inlineVars?.length) {
+                out.push(`CSS custom properties (inline):\n${inlineVars.slice(0, 15).join('\n')}`);
+            }
+        }
+
+        // ── Hex colours found anywhere in CSS ────────────────────────────────────
+        const hexColors = allCss.match(/#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})\b/g);
+        if (hexColors?.length) {
+            const unique = [...new Set(hexColors)];
+            out.push(`Hex colors found in CSS: ${unique.slice(0, 20).join(', ')}`);
+        }
+
+        return out.join('\n\n') || 'Limited brand signals available — no external CSS or meta tags found.';
     }
 
     private _fetchUrl(url: string): Promise<string | null> {
@@ -250,23 +375,6 @@ export class BlueprintViewProvider implements vscode.WebviewViewProvider {
                 }).on('error', () => { clearTimeout(timeout); resolve(null); });
             } catch { clearTimeout(timeout); resolve(null); }
         });
-    }
-
-    private _extractBrandSignals(html: string): string {
-        const out: string[] = [];
-        const themeColor = html.match(/<meta[^>]+name="theme-color"[^>]+content="([^"]+)"/i);
-        if (themeColor) out.push(`Theme color: ${themeColor[1]}`);
-        const ogTitle = html.match(/<meta[^>]+property="og:title"[^>]+content="([^"]+)"/i);
-        if (ogTitle) out.push(`Brand title: ${ogTitle[1]}`);
-        const ogDesc = html.match(/<meta[^>]+property="og:description"[^>]+content="([^"]+)"/i);
-        if (ogDesc) out.push(`Brand desc: ${ogDesc[1]}`);
-        const fonts = html.match(/fonts\.googleapis\.com[^"]+family=([^"&]+)/g);
-        if (fonts) out.push(`Google Fonts: ${fonts.slice(0, 3).join(', ')}`);
-        const cssVars = html.match(/--[\w-]*(?:color|bg|primary|secondary|brand)[\w-]*\s*:\s*[^;]{3,30}/gi);
-        if (cssVars) out.push(`CSS color tokens:\n${cssVars.slice(0, 12).join('\n')}`);
-        const style = html.match(/<style[^>]*>([\s\S]{0,2000})/i);
-        if (style) out.push(`Style snippet:\n${style[1]}`);
-        return out.join('\n\n') || 'Limited brand signals available';
     }
 
     // ── Phase execution ──────────────────────────────────────────────────────────

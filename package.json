@@ -2,7 +2,7 @@
   "name": "blueprint",
   "displayName": "Blueprint: Idea to Build Brief",
   "description": "8 specialized AI agents that transform your app idea into a complete, annotated build brief — brand identity, API contracts, database schema, TDD strategy, UI spec, and a one-shot master prompt. Supports Gemini, OpenAI, Groq, and Azure OpenAI.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "license": "SEE LICENSE IN LICENSE",
   "publisher": "blueprint-dev",
   "repository": {
@@ -217,5 +217,8 @@
     "@typescript-eslint/parser": "^6.x",
     "eslint": "^8.x",
     "typescript": "^5.x"
+  },
+  "dependencies": {
+    "@atjsh/llmlingua-2": "^2.0.3"
   }
 }

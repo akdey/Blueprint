@@ -226,6 +226,68 @@ export class ProjectStateManager {
         return ctx;
     }
 
+    /**
+     * Builds a token-budgeted context using ContextCompressor.
+     * - Recent phases: verbatim
+     * - Middle phases: LLMLingua2 semantic compression (or deterministic fallback)
+     * - Oldest phases: headline only
+     * Total budget: ~48,000 chars (~12K tokens)
+     * This method is async because LLMLingua2 compression is async.
+     */
+    async buildSmartContext(upToPhase: number, compressor: import('../agents/ContextCompressor').ContextCompressor): Promise<string> {
+        if (!this.state) return '';
+
+        // ── Static prefix (ALWAYS included — this is the cache-stable part) ────
+        const levelMap: Record<ProjectLevel, string> = {
+            prototype: 'PROTOTYPE — Simplest working demo. Prioritise speed and clarity over completeness. SQLite, no complex auth, minimal error handling. Get it running.',
+            mvp: 'MVP — Production-like but not over-engineered. Balance speed with correctness. PostgreSQL, proper auth, basic monitoring.',
+            production: 'PRODUCTION — Enterprise-grade. Full security, scalability, observability, automated tests, CI/CD, zero-downtime deployments.',
+        };
+
+        let prefix = `# Project: ${this.state.projectName}\n`;
+        prefix += `## Overview\n${this.state.projectDescription}\n\n`;
+        prefix += `## Build Level: ${this.state.projectLevel.toUpperCase()}\n`;
+        prefix += `> ${levelMap[this.state.projectLevel]}\n\n`;
+
+        if (this.state.clientName) {
+            prefix += `## Client / Brand: ${this.state.clientName}\n`;
+            if (this.state.industry) prefix += `Industry: ${this.state.industry}\n`;
+            if (this.state.clientBranding) {
+                prefix += `\n### Brand Context (from ${this.state.clientWebsiteUrl || 'website'})\n${this.state.clientBranding}\n`;
+            }
+            prefix += '\n';
+        }
+
+        if (this.state.customStandards) {
+            prefix += `## User-Defined Standards & Guidelines\n`;
+            prefix += `> STRIKE DIRECTIVE: Follow these custom standards exactly.\n\n`;
+            prefix += `${this.state.customStandards}\n\n`;
+        }
+
+        if (this.state.techStack?.length) {
+            prefix += `## Tech Stack Decisions (confirmed by user — adhere strictly)\n`;
+            this.state.techStack.forEach(q => {
+                prefix += `- **${q.question}**: ${q.selected}\n`;
+            });
+            prefix += '\n';
+        }
+
+        // ── Dynamic artifact context (phase-budgeted, may be compressed) ────────
+        const artifactMap = new Map<number, { name: string; subtitle: string; content: string }>();
+        for (let i = 1; i < upToPhase; i++) {
+            const phase = this.state.phases.find(p => p.id === i);
+            const def = PHASE_DEFINITIONS.find(d => d.id === i);
+            const content = phase?.editedArtifact || phase?.artifact || '';
+            if (def && content.trim()) {
+                artifactMap.set(i, { name: def.name, subtitle: def.subtitle, content });
+            }
+        }
+
+        const compressedArtifacts = await compressor.buildBudgetedContext(upToPhase, artifactMap);
+
+        return prefix + compressedArtifacts;
+    }
+
     async reset(): Promise<void> {
         this.state = null;
         await this.context.workspaceState.update(STATE_KEY, undefined);

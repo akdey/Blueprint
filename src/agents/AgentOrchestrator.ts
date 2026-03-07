@@ -1,6 +1,8 @@
-// Blueprint Agent Orchestrator — 8 specialized agents
+// Blueprint Agent Orchestrator — 8 specialized agents with smart context budgeting.
+// Uses ContextCompressor (LLMLingua-2) to keep per-agent token usage within budget.
 import { LLMClient } from './LLMClient';
 import { ProjectStateManager, PHASE_DEFINITIONS } from '../state/ProjectStateManager';
+import { ContextCompressor } from './ContextCompressor';
 
 // Import Prompts
 import * as IdentityPrompt from './prompts/identity';
@@ -17,10 +19,15 @@ export type AgentProgressCallback = (phase: number, status: string, content?: st
 export class AgentOrchestrator {
     private client: LLMClient;
     private stateManager: ProjectStateManager;
+    private compressor: ContextCompressor;
 
     constructor(client: LLMClient, stateManager: ProjectStateManager) {
         this.client = client;
         this.stateManager = stateManager;
+        // ContextCompressor starts loading LLMLingua2 in background immediately.
+        // If LLMLingua2 loads before the first later-phase run, semantic compression is used.
+        // Otherwise it falls back to deterministic truncation — always safe.
+        this.compressor = new ContextCompressor();
     }
 
     async runPhase(
@@ -38,8 +45,16 @@ export class AgentOrchestrator {
         const systemPrompt = this.getSystemPrompt(def.agentType);
         if (!systemPrompt) throw new Error(`No system prompt for agent type: ${def.agentType}`);
 
-        // Build cumulative context (all approved artifacts from prior phases + level + tech stack)
-        const context = this.stateManager.buildContext(phaseId);
+        // Phases 1-3 are small enough to use verbatim context.
+        // Phases 4-8 use smart context budgeting with LLMLingua2 compression.
+        let context: string;
+        if (phaseId <= 3) {
+            // Legacy path — no compression needed, phases are early and context is small
+            context = this.stateManager.buildContext(phaseId);
+        } else {
+            // Smart path — applies per-phase context policy + enforces 48K char budget
+            context = await this.stateManager.buildSmartContext(phaseId, this.compressor);
+        }
 
         const userPrompt = this.buildUserPrompt(phaseId, state.projectName, state.projectDescription, context);
 
@@ -73,6 +88,10 @@ export class AgentOrchestrator {
         projectDescription: string,
         context: string
     ): string {
+        // User prompts follow a cache-friendly structure:
+        //   1. STATIC task header (rarely changes — good for cache prefix)
+        //   2. Project name + description (stable across phases)
+        //   3. Dynamic context (prior phase artifacts — changes; always last)
         switch (phaseId) {
             case 1: return IdentityPrompt.USER_PROMPT(projectName, projectDescription, context);
             case 2: return ScopePrompt.USER_PROMPT(projectName, projectDescription, context);

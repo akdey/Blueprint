@@ -108,6 +108,20 @@ The Design phase (Phase 7) is uniquely structured to produce a **"✨ Wow Factor
 - **Unexpected Delight**: One "surplus" feature (AI-generated hover summaries, confetti on milestones).
 - **Premium UX**: Glassmorphism, smooth transitions, and high-quality empty states as first-class citizens.
 
+### 🧠 Smart Context + LLMLingua2 Compression
+Every agent gets exactly the context it needs — no more token overflows on later phases.
+- **Phase-Aware Policy**: Each agent receives full verbatim context for the 2 most recent phases, LLMLingua2-compressed context for older phases, and headline-only snippets for the oldest.
+- **LLMLingua2 (Microsoft, JS/Node port)**: Uses a BERT-sized token classifier to compress older phase artifacts by 50% while preserving semantic meaning.
+- **48K char budget**: Total context per agent is capped at ~12K tokens, keeping all providers well within their context windows.
+- **Graceful fallback**: If LLMLingua2 hasn't loaded yet, a deterministic compressor (header + first-sentence extraction) kicks in automatically.
+
+### 🎨 Real Website Branding Extraction (Identity Agent)
+Blueprint now fetches your client's actual brand tokens from their live website:
+- **External CSS scraping**: Discovers and fetches up to 3 linked stylesheets in parallel (capped at 30KB each) — where real brand custom properties live.
+- **CSS token extraction**: Scans for `--color-*`, `--brand-*`, `--font-*` custom properties, `@font-face` declarations, and all hex color values.
+- **Google Fonts detection**: Found in both HTML `<link>` tags and CSS `@import` rules.
+- **Meta signals**: Theme color, OG title, OG description.
+
 ### 🧠 Cumulative Context = No Contradictions
 Every agent receives the **approved, edited output** of every previous phase. The Database agent knows your API contract. The Design agent references your brand colors. The Handoff agent embeds *all of it* inline.
 
@@ -173,16 +187,21 @@ Blueprint VS Code Extension
 │   │   ├── BlueprintViewProvider.ts  — Webview controller, all message handlers
 │   │   └── BlueprintPanelManager.ts — (stub, sidebar is primary UI)
 │   ├── agents/
-│   │   ├── AgentOrchestrator.ts  — 8 specialized system prompts + phase runner
-│   │   └── LLMClient.ts          — Multi-provider LLM client (Gemini/OpenAI/Groq/Azure)
+│   │   ├── AgentOrchestrator.ts  — 8 specialized phases + smart context routing
+│   │   ├── ContextCompressor.ts  — LLMLingua2 + deterministic fallback compressor
+│   │   ├── LLMClient.ts          — Multi-provider LLM client (Gemini/OpenAI/Groq/Azure)
+│   │   └── prompts/              — 8 agent prompts (cache-friendly static system prompts)
 │   └── state/
-│       └── ProjectStateManager.ts — State, artifact persistence, context builder
+│       └── ProjectStateManager.ts — State, artifact persistence, buildContext + buildSmartContext
 │
 └── media/
     └── sidebar.html              — Full sidebar UI (vanilla HTML/CSS/JS)
 ```
 
-**Key design decision**: The entire sidebar is a single `sidebar.html` file with vanilla JS — no bundler, no React, no build step. Fast to iterate, easy to inspect.
+**Key design decisions**:
+- The entire sidebar is a single `sidebar.html` with vanilla JS — no bundler, no React, no build step.
+- System prompts are **fully static** (no dynamic variables) — enabling server-side caching on Gemini and OpenAI.
+- Dynamic content (project data + prior artifacts) lives **only in user prompts**, at the end — ensuring the static prefix caches correctly.
 
 ---
 
@@ -201,6 +220,10 @@ npm run compile
 
 ## 🗺️ Roadmap
 
+- [x] 🎨 Real website branding extraction (external CSS stylesheets + CSS custom properties)
+- [x] 🧠 LLMLingua2 prompt compression — smart context budgeting across all 8 phases
+- [x] 📝 All 8 agent prompts deeply detailed with mandatory output sections
+- [x] 🚀 Cache-friendly prompt structure (static system prompts, dynamic content last)
 - [ ] 🤝 VS Code Marketplace publish
 - [ ] 📊 Project dashboard — view all `.blueprint/` artifacts in a panel
 - [ ] 🌐 URL import — paste a spec doc URL, Blueprint scrapes it
