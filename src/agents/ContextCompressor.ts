@@ -19,7 +19,7 @@
  */
 
 // ── Constants ─────────────────────────────────────────────────────────────────
-const MAX_CONTEXT_CHARS = 48_000;   // ~12K tokens — safe budget for 16K-limit models
+const MAX_CONTEXT_CHARS = 24_000;   // ~6K tokens — safely below Groq's 12K TPM free-tier limit
 const COMPRESS_RATIO = 0.50;        // Target 50% token reduction via LLMLingua2
 const HEADLINE_MAX_CHARS = 400;     // Characters kept per headline-only phase
 

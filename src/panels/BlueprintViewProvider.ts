@@ -237,10 +237,18 @@ export class BlueprintViewProvider implements vscode.WebviewViewProvider {
             const signals = this._extractBrandSignals(html, externalCss);
 
             const branding = await client.generate(
-                'You are a brand analyst. Respond in structured Markdown, max 300 words.',
-                `Extract the brand identity of "${clientName}" from these web signals.\n` +
-                `List: primary/secondary/accent colors (hex), font families, design style (minimal/bold/etc), brand tone (formal/casual).\n` +
-                `Also extract ANY CSS custom properties (--color-*, --font-*, --brand-*) found in the signals.\n\n${signals}`
+                'You are an elite brand analyst. Respond in structured Markdown, max 300 words.',
+                `Analyze the web design signals below to extract the TRUE brand identity of "${clientName}".\n\n` +
+                `CRITICAL RULES:\n` +
+                `1. Differentiate core brand colors from generic web colors. Many sites use standard blue (#0000ff, #007bff) for links/buttons, or grey/black for text. Do NOT report these as the primary brand color.\n` +
+                `2. Look for variables named --primary, --brand, --theme, or --accent.\n` +
+                `3. Look for the most frequently used non-grayscale hex color that isn't standard link blue.\n\n` +
+                `Extract:\n` +
+                `- Primary/Secondary/Accent colors (hex codes)\n` +
+                `- Font families (prioritize custom/Google fonts over system UI stacks)\n` +
+                `- Design style (minimal, bold, corporate, playful, etc.)\n` +
+                `- Brand tone (formal, casual, energetic, etc.)\n\n` +
+                `--- RAW CSS/HTML SIGNALS ---\n${signals}`
             );
             await this._stateManager.updateClientBranding(branding);
             this._post({ type: 'toast', text: `✓ ${clientName} brand context loaded from website`, variant: 'success' });
