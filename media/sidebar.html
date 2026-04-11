@@ -1445,8 +1445,18 @@
                     <input type="text" id="cfg-litellm-url" placeholder="http://localhost:4000/v1" />
                 </div>
                 <div class="settings-row">
-                    <label>Model ID</label>
-                    <input type="text" id="cfg-litellm-model" placeholder="gpt-4o" />
+                    <label>Model</label>
+                    <select id="cfg-litellm-model" onchange="onModelSelect('litellm')">
+                        <option value="gpt-4o">gpt-4o</option>
+                        <option value="gpt-4o-mini">gpt-4o-mini</option>
+                        <option value="claude-3-5-sonnet">claude-3-5-sonnet</option>
+                        <option value="llama-3.1-405b">llama-3.1-405b</option>
+                        <option value="other">Other / Custom —></option>
+                    </select>
+                    <div class="custom-model-wrap" id="custom-litellm-wrap" style="display:none">
+                        <label>Custom LiteLLM Model ID</label>
+                        <input type="text" id="cfg-litellm-model-custom" placeholder="e.g. vertex_ai/gemini-pro" />
+                    </div>
                 </div>
                 <div class="settings-row">
                     <label>API Key (Optional)</label>
@@ -1830,64 +1840,64 @@
         function openSettingsScreen(config) {
             S._prevScreen = document.querySelector('.screen.active').id;
             // Set Provider
-            document.getElementById('cfg-provider').value = config.provider;
+            const pVal = config.provider || 'gemini';
+            const pSelect = document.getElementById('cfg-provider');
+            if ([...pSelect.options].some(o => o.value === pVal)) {
+                pSelect.value = pVal;
+                document.getElementById('custom-provider-wrap').style.display = 'none';
+            } else {
+                pSelect.value = 'other';
+                document.getElementById('custom-provider-wrap').style.display = 'block';
+                document.getElementById('cfg-provider-custom').value = pVal;
+            }
             onProviderToggle();
+
+            const initDropdown = (type, val, isVersion = false) => {
+                const id = isVersion ? `cfg-${type}-version` : `cfg-${type}-model`;
+                const cId = isVersion ? `cfg-${type}-version-custom` : `cfg-${type}-model-custom`;
+                const wId = isVersion ? `custom-${type}-wrap` : `custom-${type}-wrap`;
+                const box = document.getElementById(id);
+                if (!box) return;
+
+                if (!val) {
+                    box.selectedIndex = 0;
+                    document.getElementById(wId).style.display = 'none';
+                    return;
+                }
+
+                if ([...box.options].some(o => o.value === val)) {
+                    box.value = val;
+                    document.getElementById(wId).style.display = 'none';
+                } else {
+                    box.value = 'other';
+                    document.getElementById(wId).style.display = 'block';
+                    document.getElementById(cId).value = val;
+                }
+            };
 
             // Set Gemini
             document.getElementById('cfg-gemini-key').value = config.geminiApiKey || '';
-            const gBox = document.getElementById('cfg-gemini-model');
-            if ([...gBox.options].some(o => o.value === config.geminiModel)) {
-                gBox.value = config.geminiModel;
-                document.getElementById('custom-gemini-wrap').style.display = 'none';
-            } else {
-                gBox.value = 'other';
-                document.getElementById('custom-gemini-wrap').style.display = 'block';
-                document.getElementById('cfg-gemini-model-custom').value = config.geminiModel || '';
-            }
+            initDropdown('gemini', config.geminiModel);
 
             // Set OpenAI
             document.getElementById('cfg-openai-key').value = config.openaiApiKey || '';
             document.getElementById('cfg-openai-url').value = config.openaiBaseUrl || '';
-            const oBox = document.getElementById('cfg-openai-model');
-            if ([...oBox.options].some(o => o.value === config.openaiModel)) {
-                oBox.value = config.openaiModel;
-                document.getElementById('custom-openai-wrap').style.display = 'none';
-            } else {
-                oBox.value = 'other';
-                document.getElementById('custom-openai-wrap').style.display = 'block';
-                document.getElementById('cfg-openai-model-custom').value = config.openaiModel || '';
-            }
+            initDropdown('openai', config.openaiModel);
 
             // Set Groq
             document.getElementById('cfg-groq-key').value = config.groqApiKey || '';
-            const grBox = document.getElementById('cfg-groq-model');
-            if ([...grBox.options].some(o => o.value === config.groqModel)) {
-                grBox.value = config.groqModel;
-                document.getElementById('custom-groq-wrap').style.display = 'none';
-            } else {
-                grBox.value = 'other';
-                document.getElementById('custom-groq-wrap').style.display = 'block';
-                document.getElementById('cfg-groq-model-custom').value = config.groqModel || '';
-            }
+            initDropdown('groq', config.groqModel);
 
             // Set Azure
             document.getElementById('cfg-azure-key').value = config.azureApiKey || '';
             document.getElementById('cfg-azure-endpoint').value = config.azureEndpoint || '';
             document.getElementById('cfg-azure-deployment').value = config.azureDeploymentName || '';
-            const aBox = document.getElementById('cfg-azure-version');
-            if ([...aBox.options].some(o => o.value === config.azureApiVersion)) {
-                aBox.value = config.azureApiVersion;
-                document.getElementById('custom-azure-wrap').style.display = 'none';
-            } else {
-                aBox.value = 'other';
-                document.getElementById('custom-azure-wrap').style.display = 'block';
-                document.getElementById('cfg-azure-version-custom').value = config.azureApiVersion || '';
-            }
+            initDropdown('azure', config.azureApiVersion, true);
 
             // Set LiteLLM
             document.getElementById('cfg-litellm-key').value = config.litellmApiKey || '';
-            document.getElementById('cfg-litellm-model').value = config.litellmModel || '';
             document.getElementById('cfg-litellm-url').value = config.litellmBaseUrl || '';
+            initDropdown('litellm', config.litellmModel);
 
             show('screen-settings');
         }
@@ -1939,7 +1949,7 @@
                 azureDeploymentName: document.getElementById('cfg-azure-deployment').value.trim(),
                 azureApiVersion: getVersion('azure'),
                 litellmApiKey: document.getElementById('cfg-litellm-key').value.trim(),
-                litellmModel: document.getElementById('cfg-litellm-model').value.trim(),
+                litellmModel: getModel('litellm'),
                 litellmBaseUrl: document.getElementById('cfg-litellm-url').value.trim(),
             };
 
