@@ -7,7 +7,7 @@
 **Blueprint is a VS Code extension that acts as a team of elite AI agents,** each specializing in one phase of software design. You describe your app, Blueprint runs 8 sequential agents, and you get a battle-tested, fully-commented, one-shot build brief that any developer or AI coding assistant can execute immediately.
 
 [![VS Code](https://img.shields.io/badge/VS%20Code-1.85+-blue?logo=visual-studio-code)](https://code.visualstudio.com/)
-[![Version](https://img.shields.io/badge/version-0.2.0-brightgreen)](https://github.com/akdey/Blueprint/raw/main/blueprint-0.2.0.vsix)
+[![Version](https://img.shields.io/badge/version-0.3.0-brightgreen)](https://github.com/akdey/Blueprint/raw/main/blueprint-0.3.0.vsix)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178c6?logo=typescript)](https://www.typescriptlang.org/)
 [![LLM Providers](https://img.shields.io/badge/LLM-Gemini%20%7C%20OpenAI%20%7C%20Groq%20%7C%20Azure%20%7C%20LiteLLM-orange)](https://openai.com)
 [![License](https://img.shields.io/badge/license-Proprietary-red)](LICENSE)
@@ -20,21 +20,20 @@
 
 **Get Blueprint running in 30 seconds:**
 
-1.  **Download the Extension**: [**Click here to download `blueprint-0.2.0.vsix`**](https://github.com/akdey/Blueprint/raw/main/blueprint-0.2.0.vsix)
+1.  **Download the Extension**: [**Click here to download `blueprint-0.3.0.vsix`**](https://github.com/akdey/Blueprint/raw/main/blueprint-0.3.0.vsix)
 2.  **Install in VS Code**: Open VS Code → Extensions (`Ctrl+Shift+X`) → Click the `...` in the top right → **Install from VSIX...** → Select the downloaded file.
 3.  **Activate**: Click the ⬟ icon in your Activity Bar.
 
 ---
 
-## 🆕 What's New in v0.2.0
+## 🆕 What's New in v0.3.0
 
 | | Feature | Impact |
 |---|---|---|
-| 🗜️ | **LLMLingua2 Context Compression** | Phases 4–8 no longer hit token limits — older artifacts are semantically compressed |
-| 🎨 | **Real CSS Branding Scraper** | Fetches actual linked stylesheets and extracts `--color-*`, `@font-face`, hex tokens |
-| 📝 | **9× Deeper Agent Prompts** | All 8 agents now have mandatory numbered output sections with exact code/table formats |
-| 🧠 | **Two-Dimensional Wow Factor** | Solution Intelligence (sentiment analysis, anomaly detection, etc.) + UI/UX Delight |
-| 🚀 | **Cache-Friendly Prompts** | 100% static system prompts enable Gemini/OpenAI prefix caching |
+| 🧠 | **Gemini KV Cache Optimization** | **April 2026 Update**: Manually manages Gemini `cachedContents` (KV cache) — 10× faster generations on later phases and zero context limit errors. |
+| ⚡ | **April 2026 Model Support** | Gemini 3.1 series, GPT-5.4, Qwen 3 series, and DeepSeek V3/R1 support out of the box. |
+| 🚀 | **Auto-Preview Flow** | Artifacts now automatically open as rendered previews "beside" your active code as soon as you approve a phase. |
+| 🗜️ | **128K+ Character Budgets** | Expanded context windows across all providers with semantic fallback via LLMLingua2. |
 
 ---
 
@@ -122,10 +121,10 @@ The Design phase (Phase 7) is uniquely structured to produce a **"✨ Wow Factor
 - **Unexpected Delight**: One "surplus" feature (AI-generated hover summaries, confetti on milestones).
 - **Premium UX**: Glassmorphism, smooth transitions, and high-quality empty states as first-class citizens.
 
-### 🧠 Smart Context + LLMLingua2 Compression
+### 🧠 Smart Context + Gemini KV Caching
 Every agent gets exactly the context it needs — no more token overflows on later phases.
-- **Provider-Specific Token Budgets**: Dynamically allocates massive 100K character budgets for Gemini/OpenAI, and strict 24K limits for Groq to prevent TPM rate limits.
-- **Phase-Aware Policy**: Each agent receives full verbatim context for the 2 most recent phases, LLMLingua2-compressed context for older phases, and headline-only snippets for the oldest.
+- **Gemini KV Cache (Exclusive)**: Blueprint manually manages the **KV Cache** for your project prefix. The Identity, Scope, and Architecture are "frozen" in the model's memory, ensuring subsequent agents (like UI and API) react instantly.
+- **Expanded Token Budgets**: Dynamically allocates up to **2M character budgets** for Gemini 1.5/3.1, and strict 128K limits for Groq/OpenAI.
 - **LLMLingua2 (Microsoft, JS/Node port)**: Uses a BERT-sized token classifier to compress older phase artifacts by 50% while preserving semantic meaning.
 - **Graceful fallback**: If LLMLingua2 hasn't loaded yet, a deterministic compressor (header + first-sentence extraction) kicks in automatically.
 
@@ -151,8 +150,8 @@ Every agent is instructed to produce code with:
 
 The handoff brief doesn't just tell someone *what* to build — it tells them *why* every decision was made.
 
-### 🔌 Multi-LLM Support — Your Key, Your Choice
-No subscription. No middleman. Bring your own API key. Supports **Google Gemini** (2.0 Flash/1.5 Pro), **OpenAI**, **Groq** (fastest), **Azure OpenAI**, and **LiteLLM** (connect to anything).
+### 🔌 Multi-LLM Support — 2026 Frontier Models
+No subscription. No middleman. Bring your own API key. Supports **Google Gemini 3.1**, **GPT-5.4**, **Qwen 3**, **DeepSeek V3/R1**, and any LiteLLM-compatible endpoint.
 
 ---
 
