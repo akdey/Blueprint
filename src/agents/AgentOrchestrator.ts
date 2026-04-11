@@ -14,29 +14,28 @@ import * as DataPrompt from './prompts/data';
 import * as DesignPrompt from './prompts/design';
 import * as HandoffPrompt from './prompts/handoff';
 import * as SeedingPrompt from './prompts/seeding';
+import { GeminiCacheManager } from './LLMClient';
+
 
 export type AgentProgressCallback = (phase: number, status: string, content?: string) => void;
 
 // Context budgets per provider (in characters, based on free/standard tier TPM limits)
 const PROVIDER_CONTEXT_LIMITS: Record<string, number> = {
-    'groq': 24_000,      // ~6K tokens (Groq 12K TPM limit)
-    'gemini': 100_000,   // ~25K tokens (Gemini 1M token window)
-    'openai': 100_000,   // ~25K tokens (GPT-4o 128K token window)
-    'azure': 100_000,
-    'litellm': 100_000
+    'groq': 128_000,     // ~32K tokens (Groq 2026 limits)
+    'gemini': 2_000_000, // ~500K tokens (Gemini 1.5/3.1 window)
+    'openai': 128_000,   // ~32K tokens (GPT-4o/5.4 window)
+    'azure': 128_000,
+    'litellm': 128_000
 };
 
 export class AgentOrchestrator {
-    private client: LLMClient;
-    private stateManager: ProjectStateManager;
     private compressor: ContextCompressor;
+    private cachedContentName: string | null = null;
+    private geminiApiKey: string | null = null;
 
-    constructor(client: LLMClient, stateManager: ProjectStateManager) {
-        this.client = client;
-        this.stateManager = stateManager;
+    constructor(private client: LLMClient, private stateManager: ProjectStateManager, geminiApiKey?: string) {
+        this.geminiApiKey = geminiApiKey || null;
         // ContextCompressor starts loading LLMLingua2 in background immediately.
-        // If LLMLingua2 loads before the first later-phase run, semantic compression is used.
-        // Otherwise it falls back to deterministic truncation — always safe.
         this.compressor = new ContextCompressor();
     }
 
@@ -55,16 +54,37 @@ export class AgentOrchestrator {
         const systemPrompt = this.getSystemPrompt(def.agentType);
         if (!systemPrompt) throw new Error(`No system prompt for agent type: ${def.agentType}`);
 
+        // ── KV Cache Management (Gemini Exclusive) ───────────────────────────
+        let activeCache: string | undefined;
+        if (this.client.getLabel().toLowerCase().includes('gemini') && this.geminiApiKey) {
+            try {
+                if (!this.cachedContentName) {
+                    onProgress(phaseId, 'optimizing-kv-cache');
+                    const manager = new GeminiCacheManager(this.geminiApiKey);
+                    const staticPrefix = this.stateManager.getStaticPrefix();
+                    const modelId = this.client.getLabel().split(' — ')[1] || 'gemini-3.1-flash';
+                    
+                    this.cachedContentName = await manager.createCache(
+                        modelId,
+                        `blueprint-${state.projectName.toLowerCase().replace(/\s+/g, '-')}`,
+                        systemPrompt, // We use the first agent's system prompt as the base cache instruction
+                        staticPrefix
+                    );
+                }
+                activeCache = this.cachedContentName;
+            } catch (err) {
+                console.error('[Blueprint] Cache creation failed, falling back to standard prompt.', err);
+            }
+        }
+
         // Phases 1-3 are small enough to use verbatim context.
         // Phases 4-8 use smart context budgeting with LLMLingua2 compression.
         let context: string;
         if (phaseId <= 3) {
-            // Legacy path — no compression needed, phases are early and context is small
             context = this.stateManager.buildContext(phaseId);
         } else {
-            // Smart path — applies per-phase context policy + enforces provider-specific char budget
             const providerName = this.client.getLabel().toLowerCase();
-            let maxChars = 100_000; // default safe fallback
+            let maxChars = 128_000; 
             for (const [key, limit] of Object.entries(PROVIDER_CONTEXT_LIMITS)) {
                 if (providerName.includes(key)) {
                     maxChars = limit;
@@ -74,15 +94,38 @@ export class AgentOrchestrator {
             context = await this.stateManager.buildSmartContext(phaseId, this.compressor, maxChars);
         }
 
-        const userPrompt = this.buildUserPrompt(phaseId, state.projectName, state.projectDescription, context);
+        // If we have an active KV cache, the static prefix is ALREADY in the cache.
+        // We only send the delta (dynamic context artifacts).
+        let finalContext = context;
+        if (activeCache) {
+            const staticPrefix = this.stateManager.getStaticPrefix();
+            if (context.startsWith(staticPrefix)) {
+                finalContext = context.substring(staticPrefix.length).trim();
+            }
+        }
+
+        const userPrompt = this.buildUserPrompt(phaseId, state.projectName, state.projectDescription, finalContext);
 
         try {
-            const result = await this.client.generate(systemPrompt, userPrompt);
+            const result = await this.client.generate(systemPrompt, userPrompt, activeCache);
             onProgress(phaseId, 'review', result);
             return result;
         } catch (err) {
             const errorMsg = err instanceof Error ? err.message : String(err);
             throw new Error(`Phase ${phaseId} generation failed: ${errorMsg}`);
+        }
+    }
+
+    /** Clean up the KV cache when orchestrator session is destroyed */
+    async dispose(): Promise<void> {
+        if (this.cachedContentName && this.geminiApiKey) {
+            try {
+                const manager = new GeminiCacheManager(this.geminiApiKey);
+                await manager.deleteCache(this.cachedContentName);
+                this.cachedContentName = null;
+            } catch (err) {
+                console.error('[Blueprint] Cache cleanup failed.', err);
+            }
         }
     }
 

@@ -132,7 +132,7 @@ export class BlueprintViewProvider implements vscode.WebviewViewProvider {
                 m.industry,
                 m.customStandards
             );
-            this._orchestrator = new AgentOrchestrator(createLLMClient(cfg), this._stateManager);
+            this._orchestrator = new AgentOrchestrator(createLLMClient(cfg), this._stateManager, cfg.geminiApiKey);
             this._post({ type: 'stateUpdate', state: this._stateManager.getState() });
             // Fetch client branding in background if URL provided
             if (m.clientWebsiteUrl) {
@@ -403,7 +403,11 @@ export class BlueprintViewProvider implements vscode.WebviewViewProvider {
         this._post({ type: 'phaseGenerating', phaseId });
 
         try {
-            const result = await this._orchestrator.runPhase(phaseId, () => { });
+            const result = await this._orchestrator.runPhase(phaseId, (ph, status) => {
+                if (status === 'optimizing-kv-cache') {
+                    this._post({ type: 'phaseStatus', phaseId: ph, status: 'KV Cache Preparing...', sub: 'Optimizing context for April 2026 models' });
+                }
+            });
             await this._stateManager.updatePhaseArtifact(phaseId, result);
             this._post({ type: 'phaseReady', phaseId, content: result, state: this._stateManager.getState() });
         } catch (e) {
@@ -412,6 +416,10 @@ export class BlueprintViewProvider implements vscode.WebviewViewProvider {
             this._post({ type: 'phaseError', phaseId, error: msg });
         } finally {
             this._isGenerating = false;
+            // Clean up cache if this was the last phase
+            if (phaseId === 9 && this._orchestrator) {
+                await this._orchestrator.dispose();
+            }
         }
     }
 
@@ -426,6 +434,8 @@ export class BlueprintViewProvider implements vscode.WebviewViewProvider {
             await this._handleOpenArtifact(phaseId);
             this._post({ type: 'toast', text: `Phase ${phaseId}: ${def?.name} approved ✓ — file saved & opened`, variant: 'success' });
         } else {
+            // Auto-open the rendered preview to the side on approval
+            await this._handleOpenMarkdownPreview(phaseId);
             this._post({ type: 'toast', text: `Phase ${phaseId}: ${def?.name} approved ✓`, variant: 'success' });
         }
 
@@ -539,6 +549,7 @@ export class BlueprintViewProvider implements vscode.WebviewViewProvider {
     // ── Helpers ──────────────────────────────────────────────────────────────────
 
     public async resetProject(): Promise<void> {
+        if (this._orchestrator) await this._orchestrator.dispose();
         await this._stateManager.reset();
         this._orchestrator = null;
         this._post({ type: 'showSetup' });

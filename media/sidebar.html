@@ -1311,7 +1311,7 @@
             { id: 6, name: 'Data', sub: 'Database Modeling', icon: '◈', agent: 'Data Agent' },
             { id: 7, name: 'Design', sub: 'UI/UX, Wow Factor & Animations', icon: '◇', agent: 'Design Agent' },
             { id: 8, name: 'Handoff', sub: 'One-Shot Master Prompt', icon: '⬟', agent: 'Handoff Agent' },
-            { id: 9, name: 'Seeding', sub: 'Mock Data Generation (Optional)', icon: '🌿', agent: 'Seeding Agent' }
+            // { id: 9, name: 'Seeding', sub: 'Mock Data Generation (Optional)', icon: '🌿', agent: 'Seeding Agent' }
         ];
 
         let S = {
@@ -1337,6 +1337,12 @@
                 case 'phaseApproved': onPhaseApproved(m.phaseId, m.state); break;
                 case 'phaseError': onPhaseError(m.phaseId, m.error); break;
                 case 'phaseSelected': onPhaseSelected(m.phaseId, m.phase, m.state); break;
+                case 'phaseStatus':
+                    const lbl = document.querySelector('.spin-label');
+                    const sub = document.querySelector('.spin-sub');
+                    if (lbl) lbl.textContent = m.status;
+                    if (sub) sub.textContent = m.sub;
+                    break;
                 case 'error': toast(m.message, 'error'); break;
                 case 'toast': toast(m.text, m.variant); break;
                 case 'showSetup': show('screen-setup'); break;

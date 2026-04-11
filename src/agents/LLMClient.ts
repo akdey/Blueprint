@@ -34,7 +34,7 @@ export interface LLMConfig {
 }
 
 export interface LLMClient {
-    generate(systemPrompt: string, userPrompt: string): Promise<string>;
+    generate(systemPrompt: string, userPrompt: string, cachedContentName?: string): Promise<string>;
     validate(): Promise<boolean>;
     getLabel(): string;
 }
@@ -142,14 +142,23 @@ class GeminiClient implements LLMClient {
 
     getLabel(): string { return `Gemini — ${this.model}`; }
 
-    async generate(systemPrompt: string, userPrompt: string): Promise<string> {
+    async generate(systemPrompt: string, userPrompt: string, cachedContentName?: string): Promise<string> {
         const url = `https://generativelanguage.googleapis.com/v1beta/models/${this.model}:generateContent?key=${this.apiKey}`;
 
-        const body = {
+        // If a cache is provided, the prompt structure changes:
+        // 1. systemInstruction is OMITTED (it's in the cache)
+        // 2. contents[0].text is the dynamic user prompt
+        // 3. cached_content is referenced
+        const body: any = {
             contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
-            systemInstruction: { parts: [{ text: systemPrompt }] },
             generationConfig: { temperature: 0.7, maxOutputTokens: 8192, topP: 0.95 },
         };
+
+        if (cachedContentName) {
+            body.cachedContent = cachedContentName;
+        } else {
+            body.systemInstruction = { parts: [{ text: systemPrompt }] };
+        }
 
         const raw = await httpsPost(url, body, {});
         const parsed = JSON.parse(raw);
@@ -251,7 +260,7 @@ class AzureOpenAIClient implements LLMClient {
 
     getLabel(): string { return `Azure OpenAI — ${this.deploymentName}`; }
 
-    async generate(systemPrompt: string, userPrompt: string): Promise<string> {
+    async generate(systemPrompt: string, userPrompt: string, _cache?: string): Promise<string> {
         const base = this.endpoint.replace(/\/$/, '');
         const url = `${base}/openai/deployments/${this.deploymentName}/chat/completions?api-version=${this.apiVersion}`;
 
@@ -281,5 +290,44 @@ class AzureOpenAIClient implements LLMClient {
             const r = await this.generate('Reply with OK.', 'OK');
             return r.toLowerCase().includes('ok');
         } catch { return false; }
+    }
+}
+
+// ─── Gemini Cache Manager ───────────────────────────────────────────────────
+
+export class GeminiCacheManager {
+    constructor(private apiKey: string) { }
+
+    async createCache(model: string, name: string, systemInstruction: string, contents: string, ttlSeconds: number = 3600): Promise<string> {
+        const url = `https://generativelanguage.googleapis.com/v1beta/cachedContents?key=${this.apiKey}`;
+        const body = {
+            model: `models/${model}`,
+            displayName: name,
+            systemInstruction: { parts: [{ text: systemInstruction }] },
+            contents: [{ role: 'user', parts: [{ text: contents }] }],
+            ttl: `${ttlSeconds}s`
+        };
+
+        const raw = await httpsPost(url, body, {});
+        const parsed = JSON.parse(raw);
+        if (parsed.error) throw new Error(`Cache creation error: ${parsed.error.message}`);
+        return parsed.name; // e.g. "cachedContents/..."
+    }
+
+    async deleteCache(cacheName: string): Promise<void> {
+        const url = `https://generativelanguage.googleapis.com/v1beta/${cacheName}?key=${this.apiKey}`;
+        await new Promise((resolve, reject) => {
+            const urlObj = new URL(url);
+            const req = https.request({
+                hostname: urlObj.hostname,
+                path: urlObj.pathname + urlObj.search,
+                method: 'DELETE',
+            }, (res) => {
+                if (res.statusCode && res.statusCode >= 400) reject(new Error(`HTTP ${res.statusCode}`));
+                else resolve(true);
+            });
+            req.on('error', reject);
+            req.end();
+        });
     }
 }

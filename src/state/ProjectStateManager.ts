@@ -228,17 +228,12 @@ export class ProjectStateManager {
     }
 
     /**
-     * Builds a token-budgeted context using ContextCompressor.
-     * - Recent phases: verbatim
-     * - Middle phases: LLMLingua2 semantic compression (or deterministic fallback)
-     * - Oldest phases: headline only
-     * Total budget: maxChars
-     * This method is async because LLMLingua2 compression is async.
+     * Builds the static prefix of the context (Project Overview, Branding, Tech Stack).
+     * This is the "cacheable" part of the context that remains stable across all agent phases.
      */
-    async buildSmartContext(upToPhase: number, compressor: import('../agents/ContextCompressor').ContextCompressor, maxChars: number): Promise<string> {
+    getStaticPrefix(): string {
         if (!this.state) return '';
 
-        // ── Static prefix (ALWAYS included — this is the cache-stable part) ────
         const levelMap: Record<ProjectLevel, string> = {
             prototype: 'PROTOTYPE — Simplest working demo. Prioritise speed and clarity over completeness. SQLite, no complex auth, minimal error handling. Get it running.',
             mvp: 'MVP — Production-like but not over-engineered. Balance speed with correctness. PostgreSQL, proper auth, basic monitoring.',
@@ -272,8 +267,22 @@ export class ProjectStateManager {
             });
             prefix += '\n';
         }
+        return prefix;
+    }
 
-        // ── Dynamic artifact context (phase-budgeted, may be compressed) ────────
+    /**
+     * Builds a token-budgeted context using ContextCompressor.
+     * - Recent phases: verbatim
+     * - Middle phases: LLMLingua2 semantic compression (or deterministic fallback)
+     * - Oldest phases: headline only
+     * Total budget: maxChars
+     * This method is async because LLMLingua2 compression is async.
+     */
+    async buildSmartContext(upToPhase: number, compressor: import('../agents/ContextCompressor').ContextCompressor, maxChars: number): Promise<string> {
+        if (!this.state) return '';
+
+        // ── Static prefix (ALWAYS included — this is the cache-stable part) ────
+        const prefix = this.getStaticPrefix();
         const artifactMap = new Map<number, { name: string; subtitle: string; content: string }>();
         for (let i = 1; i < upToPhase; i++) {
             const phase = this.state.phases.find(p => p.id === i);
