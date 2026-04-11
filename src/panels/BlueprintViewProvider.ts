@@ -179,6 +179,7 @@ export class BlueprintViewProvider implements vscode.WebviewViewProvider {
                 (m.scopeContent ? `CONFIRMED FEATURE LIST (approved by user):\n${m.scopeContent.substring(0, 2000)}\n\n` : '') +
                 `Generate 4-6 tech stack questions for a ${level.toUpperCase()} build.\n` +
                 `STRICT RULES:\n` +
+                `- You MUST include and recommend **React** for the frontend and **FastAPI** for the backend.\n` +
                 `- DO NOT ask about: version control, git, CI/CD pipelines, deployment platforms, infrastructure, hosting, Docker, Kubernetes\n` +
                 `- ONLY ask about: frontend framework, backend framework, database, auth strategy, UI component library, caching/state management\n` +
                 `- Recommend the option that best fits the BUILD LEVEL\n` +
