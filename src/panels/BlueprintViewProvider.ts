@@ -417,7 +417,7 @@ export class BlueprintViewProvider implements vscode.WebviewViewProvider {
         } finally {
             this._isGenerating = false;
             // Clean up cache if this was the last phase
-            if (phaseId === 9 && this._orchestrator) {
+            if (phaseId === 8 && this._orchestrator) {
                 await this._orchestrator.dispose();
             }
         }

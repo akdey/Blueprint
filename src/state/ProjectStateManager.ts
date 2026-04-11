@@ -51,7 +51,7 @@ export const PHASE_DEFINITIONS = [
     { id: 6, name: 'Data', subtitle: 'Database Modeling', icon: '◈', agentType: 'database', artifactFile: '06_data.md' },
     { id: 7, name: 'Design', subtitle: 'UI/UX, Wow Factor & Animations', icon: '◇', agentType: 'ui', artifactFile: '07_design.md' },
     { id: 8, name: 'Handoff', subtitle: 'One-Shot Master Prompt', icon: '⬟', agentType: 'handoff', artifactFile: '08_handoff.md' },
-    { id: 9, name: 'Seeding', subtitle: 'Mock Data Generation', icon: '🌿', agentType: 'seeding', artifactFile: '09_seeding.md' },
+    // { id: 9, name: 'Seeding', subtitle: 'Mock Data Generation', icon: '🌿', agentType: 'seeding', artifactFile: '09_seeding.md' },
 ];
 
 const STATE_KEY = 'blueprint.projectState';
@@ -283,7 +283,7 @@ export class ProjectStateManager {
 
         // ── Static prefix (ALWAYS included — this is the cache-stable part) ────
         const prefix = this.getStaticPrefix();
-        
+
         // The budget (maxChars) must cover BOTH the prefix and the artifact context.
         // We subtract the prefix length (plus a safety margin for separators) from the budget.
         const artifactBudget = Math.max(1000, maxChars - prefix.length - 100);

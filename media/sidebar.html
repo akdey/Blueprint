@@ -1195,7 +1195,7 @@
             </div>
 
             <div class="divider"></div>
-            <div class="sec">9-Phase TDD Workflow</div>
+            <div class="sec">8-Phase TDD Workflow</div>
             <div class="checklist">
                 <div class="check-item"><span style="width:14px">✦</span>Phase 1 — Identity: Brand &amp; visual system
                 </div>
@@ -1209,8 +1209,7 @@
                 <div class="check-item"><span style="width:14px">◈</span>Phase 6 — Data: Database Modeling</div>
                 <div class="check-item"><span style="width:14px">◇</span>Phase 7 — Design: UI/UX + Wow Factor</div>
                 <div class="check-item"><span style="width:14px">⬟</span>Phase 8 — Handoff: One-shot master prompt</div>
-                <div class="check-item"><span style="width:14px">🌿</span>Phase 9 — Seeding (Optional): Mock Data
-                    Generation</div>
+            </div>
             </div>
         </div>
     </div>
@@ -1273,7 +1272,7 @@
             <div class="prog-bar">
                 <div class="prog-fill" id="prog-fill" style="width:0%"></div>
             </div>
-            <div class="prog-lbl" id="prog-lbl">0 / 9 phases</div>
+            <div class="prog-lbl" id="prog-lbl">0 / 8 phases</div>
         </div>
 
         <div class="phase-tree" id="phase-tree"></div>
@@ -1310,8 +1309,7 @@
             { id: 5, name: 'Testing', sub: 'TDD Strategy + Mocking Patterns', icon: '◉', agent: 'Testing Agent' },
             { id: 6, name: 'Data', sub: 'Database Modeling', icon: '◈', agent: 'Data Agent' },
             { id: 7, name: 'Design', sub: 'UI/UX, Wow Factor & Animations', icon: '◇', agent: 'Design Agent' },
-            { id: 8, name: 'Handoff', sub: 'One-Shot Master Prompt', icon: '⬟', agent: 'Handoff Agent' },
-            // { id: 9, name: 'Seeding', sub: 'Mock Data Generation (Optional)', icon: '🌿', agent: 'Seeding Agent' }
+            { id: 8, name: 'Handoff', sub: 'One-Shot Master Prompt', icon: '⬟', agent: 'Handoff Agent' }
         ];
 
         let S = {
@@ -1507,8 +1505,9 @@
         function updateProg() {
             if (!S.projectState) return;
             const done = S.projectState.phases.filter(p => p.status === 'completed').length;
-            document.getElementById('prog-fill').style.width = (done / 9 * 100) + '%';
-            document.getElementById('prog-lbl').textContent = `${done} / 9 phases`;
+            const total = 8;
+            document.getElementById('prog-fill').style.width = (done / total * 100) + '%';
+            document.getElementById('prog-lbl').textContent = `${done} / ${total} phases`;
         }
 
         function selectPhase(id) { S.selectedPhase = id; hiliteTree(id); vscode.postMessage({ type: 'selectPhase', phaseId: id }); }
