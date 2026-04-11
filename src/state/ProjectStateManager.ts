@@ -283,6 +283,11 @@ export class ProjectStateManager {
 
         // ── Static prefix (ALWAYS included — this is the cache-stable part) ────
         const prefix = this.getStaticPrefix();
+        
+        // The budget (maxChars) must cover BOTH the prefix and the artifact context.
+        // We subtract the prefix length (plus a safety margin for separators) from the budget.
+        const artifactBudget = Math.max(1000, maxChars - prefix.length - 100);
+
         const artifactMap = new Map<number, { name: string; subtitle: string; content: string }>();
         for (let i = 1; i < upToPhase; i++) {
             const phase = this.state.phases.find(p => p.id === i);
@@ -293,7 +298,7 @@ export class ProjectStateManager {
             }
         }
 
-        const compressedArtifacts = await compressor.buildBudgetedContext(upToPhase, artifactMap, maxChars);
+        const compressedArtifacts = await compressor.buildBudgetedContext(upToPhase, artifactMap, artifactBudget);
 
         return prefix + compressedArtifacts;
     }

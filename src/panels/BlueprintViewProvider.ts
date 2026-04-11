@@ -473,10 +473,11 @@ export class BlueprintViewProvider implements vscode.WebviewViewProvider {
         const uri = vscode.Uri.file(path.join(folders[0].uri.fsPath, '.blueprint', def.artifactFile));
         if (!fs.existsSync(uri.fsPath)) return;
         try {
-            await vscode.commands.executeCommand('markdown.showPreviewToSide', uri);
+            // Use standard preview (opens as a tab in active column)
+            await vscode.commands.executeCommand('markdown.showPreview', uri);
         } catch {
             const doc = await vscode.workspace.openTextDocument(uri);
-            await vscode.window.showTextDocument(doc, { viewColumn: vscode.ViewColumn.Beside });
+            await vscode.window.showTextDocument(doc, { viewColumn: vscode.ViewColumn.Active });
         }
     }
 
