@@ -489,7 +489,7 @@ export class BlueprintViewProvider implements vscode.WebviewViewProvider {
         const uri = vscode.Uri.file(path.join(folders[0].uri.fsPath, '.blueprint', def.artifactFile));
         try {
             const doc = await vscode.workspace.openTextDocument(uri);
-            await vscode.window.showTextDocument(doc, { viewColumn: vscode.ViewColumn.One, preview: false });
+            await vscode.window.showTextDocument(doc, { viewColumn: vscode.ViewColumn.Active, preview: false });
         } catch {
             vscode.window.showErrorMessage(`Artifact not yet generated for Phase ${phaseId}.`);
         }
