@@ -1151,7 +1151,7 @@
                 </div>
                 <div class="field">
                     <label>Industry</label>
-                    <select id="s-industry">
+                    <select id="s-industry" onchange="onIndustrySelect()">
                         <option value="">General</option>
                         <option>SaaS</option>
                         <option>FinTech</option>
@@ -1159,8 +1159,12 @@
                         <option>E-commerce</option>
                         <option>EdTech</option>
                         <option>AI / ML</option>
-                        <option>Other</option>
+                        <option value="other">Other / Custom —></option>
                     </select>
+                    <div class="custom-model-wrap" id="s-industry-custom-wrap" style="display:none;margin-top:4px">
+                        <label>Custom Industry</label>
+                        <input type="text" id="s-industry-custom" placeholder="e.g. LegalTech, RealEstate..." />
+                    </div>
                 </div>
             </div>
             <div class="field" id="s-url-row" style="display:none">
@@ -1328,7 +1332,12 @@
                     <option value="groq">Groq</option>
                     <option value="azure-openai">Azure OpenAI</option>
                     <option value="litellm">LiteLLM</option>
+                    <option value="other">Other / Custom —></option>
                 </select>
+                <div class="custom-model-wrap" id="custom-provider-wrap" style="display:none;margin-top:4px">
+                    <label>Custom Provider Name</label>
+                    <input type="text" id="cfg-provider-custom" placeholder="e.g. Perplexity, DeepSeek..." />
+                </div>
             </div>
 
             <!-- Gemini -->
@@ -1590,7 +1599,7 @@
                 projectLevel: S.projectLevel || 'prototype',
                 clientName: document.getElementById('s-client').value.trim(),
                 clientWebsiteUrl: document.getElementById('s-client-url').value.trim(),
-                industry: document.getElementById('s-industry').value,
+                industry: document.getElementById('s-industry').value === 'other' ? document.getElementById('s-industry-custom').value.trim() : document.getElementById('s-industry').value,
                 customStandards: document.getElementById('s-standards').value.trim(),
             });
         }
@@ -1884,9 +1893,16 @@
         }
 
         function onProviderToggle() {
-            const provider = document.getElementById('cfg-provider').value;
+            const select = document.getElementById('cfg-provider');
+            const provider = select.value;
+            document.getElementById('custom-provider-wrap').style.display = provider === 'other' ? 'block' : 'none';
             document.querySelectorAll('.settings-group').forEach(g => g.classList.remove('active'));
             document.getElementById(`group-${provider}`)?.classList.add('active');
+        }
+
+        function onIndustrySelect() {
+            const select = document.getElementById('s-industry');
+            document.getElementById('s-industry-custom-wrap').style.display = select.value === 'other' ? 'block' : 'none';
         }
 
         function onModelSelect(type) {
@@ -1898,7 +1914,8 @@
         }
 
         function saveSettings() {
-            const provider = document.getElementById('cfg-provider').value;
+            const pSelect = document.getElementById('cfg-provider');
+            const provider = pSelect.value === 'other' ? document.getElementById('cfg-provider-custom').value.trim() : pSelect.value;
             const getModel = (type) => {
                 const s = document.getElementById(`cfg-${type}-model`);
                 return (s && s.value === 'other') ? document.getElementById(`cfg-${type}-model-custom`).value.trim() : s?.value;
