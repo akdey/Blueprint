@@ -2,7 +2,7 @@
   "name": "blueprint",
   "displayName": "Blueprint: Idea to Build Brief",
   "description": "8 specialized AI agents that transform your app idea into a complete, annotated build brief — brand identity, API contracts, database schema, TDD strategy, UI spec, and a one-shot master prompt. Supports Gemini, OpenAI, Groq, and Azure OpenAI.",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "license": "SEE LICENSE IN LICENSE",
   "publisher": "blueprint-dev",
   "repository": {
@@ -100,6 +100,13 @@
         "blueprint.gemini.model": {
           "type": "string",
           "default": "gemini-3.1-flash",
+          "enum": [
+            "gemini-3.1-flash",
+            "gemini-3.1-pro",
+            "gemini-3-deep-think",
+            "gemini-1.5-pro",
+            "other"
+          ],
           "markdownDescription": "Gemini model to use.\n\n- `gemini-3.1-flash` — **April 2026 Latest**: Ultra-fast, KV-caching optimized\n- `gemini-3.1-pro` — **Flagship**: Deepest understanding & reasoning\n- `gemini-3-deep-think` — Specialized for extremely complex logic\n- `gemini-1.5-pro` — High quality legacy stable",
           "order": 11
         },
@@ -112,6 +119,12 @@
         "blueprint.openai.model": {
           "type": "string",
           "default": "gpt-5.4",
+          "enum": [
+            "gpt-5.4",
+            "o4-mini",
+            "gpt-4o",
+            "other"
+          ],
           "markdownDescription": "OpenAI model to use.\n\n- `gpt-5.4` — **April 2026 Flagship**: Best quality\n- `o4-mini` — Fastest reasoning-focused model\n- `gpt-4o` — High quality legcy",
           "order": 21
         },
@@ -130,6 +143,13 @@
         "blueprint.groq.model": {
           "type": "string",
           "default": "llama-3.3-70b-versatile",
+          "enum": [
+            "llama-3.3-70b-versatile",
+            "qwen-2.5-coder-32b",
+            "deepseek-v3",
+            "deepseek-r1",
+            "other"
+          ],
           "markdownDescription": "Groq model to use.\n\n- `llama-3.3-70b-versatile` — Balanced speed/quality\n- `qwen-2.5-coder-32b` — **Top Tier Coding**: Recommended for Blueprint\n- `deepseek-v3` — High efficiency reasoning\n- `mistral-saba-24b` — Ultra-fast inference",
           "order": 31
         },
