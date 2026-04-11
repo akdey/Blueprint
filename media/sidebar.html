@@ -1094,6 +1094,18 @@
         ::-webkit-scrollbar-thumb:hover {
             background: var(--vscode-scrollbarSlider-hoverBackground)
         }
+
+        /* Settings Screen Styles */
+        .settings-hdr { display: flex; align-items: center; gap: 8px; padding-bottom: 12px; border-bottom: 1px solid var(--vscode-panel-border); margin-bottom: 15px; }
+        .settings-title { font-size: 14px; font-weight: 700; color: var(--vscode-foreground); }
+        .settings-group { margin-bottom: 18px; display: none; }
+        .settings-group.active { display: block; }
+        .settings-row { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
+        .settings-row label { font-size: 10px; font-weight: 600; text-transform: uppercase; color: var(--vscode-descriptionForeground); }
+        .settings-row input, .settings-row select { width: 100%; }
+        .settings-footer { position: sticky; bottom: 0; background: var(--vscode-sideBar-background); padding: 12px 0; border-top: 1px solid var(--vscode-panel-border); display: flex; gap: 8px; margin-top: auto; }
+        .custom-model-wrap { margin-top: 6px; border-left: 2px solid var(--bp); padding-left: 8px; animation: slideIn .2s ease; }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(-4px); } to { opacity: 1; transform: none; } }
     </style>
 </head>
 
@@ -1210,8 +1222,8 @@
                 <div class="check-item"><span style="width:14px">◇</span>Phase 7 — Design: UI/UX + Wow Factor</div>
                 <div class="check-item"><span style="width:14px">⬟</span>Phase 8 — Handoff: One-shot master prompt</div>
             </div>
-            </div>
         </div>
+    </div>
     </div>
 
     <!-- ════════ MAIN SCREEN ════════ -->
@@ -1298,6 +1310,148 @@
     </div>
     </div>
 
+    <!-- ════════ SETTINGS SCREEN ════════ -->
+    <div class="screen" id="screen-settings">
+        <div class="scroll-body" style="padding: 15px 12px; height: 100%; display: flex; flex-direction: column;">
+            <div class="settings-hdr">
+                <button class="btn-icon" onclick="backFromSettings()" title="Back">
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M10 3L5.5 7.5L10 12L11.5 10.5L8.5 7.5L11.5 4.5L10 3Z"/></svg>
+                </button>
+                <span class="settings-title">LLM Configuration</span>
+            </div>
+
+            <div class="settings-row">
+                <label>Provider</label>
+                <select id="cfg-provider" onchange="onProviderToggle()">
+                    <option value="gemini">Google Gemini</option>
+                    <option value="openai">OpenAI</option>
+                    <option value="groq">Groq</option>
+                    <option value="azure-openai">Azure OpenAI</option>
+                    <option value="litellm">LiteLLM</option>
+                </select>
+            </div>
+
+            <!-- Gemini -->
+            <div class="settings-group" id="group-gemini">
+                <div class="settings-row">
+                    <label>API Key</label>
+                    <input type="password" id="cfg-gemini-key" placeholder="Paste your API key..." />
+                </div>
+                <div class="settings-row">
+                    <label>Model</label>
+                    <select id="cfg-gemini-model" onchange="onModelSelect('gemini')">
+                        <option value="gemini-3.1-flash">gemini-3.1-flash (April 2026)</option>
+                        <option value="gemini-3.1-pro">gemini-3.1-pro (Flagship)</option>
+                        <option value="gemini-3-deep-think">gemini-3-deep-think</option>
+                        <option value="gemini-1.5-pro">gemini-1.5-pro</option>
+                        <option value="other">Other / Custom —></option>
+                    </select>
+                    <div class="custom-model-wrap" id="custom-gemini-wrap" style="display:none">
+                        <label>Custom Gemini Model Name</label>
+                        <input type="text" id="cfg-gemini-model-custom" placeholder="e.g. gemini-experimental" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- OpenAI -->
+            <div class="settings-group" id="group-openai">
+                <div class="settings-row">
+                    <label>API Key</label>
+                    <input type="password" id="cfg-openai-key" />
+                </div>
+                <div class="settings-row">
+                    <label>Model</label>
+                    <select id="cfg-openai-model" onchange="onModelSelect('openai')">
+                        <option value="gpt-5.4">gpt-5.4 (April 2026)</option>
+                        <option value="o4-mini">o4-mini (Reasoning)</option>
+                        <option value="gpt-4o">gpt-4o</option>
+                        <option value="other">Other / Custom —></option>
+                    </select>
+                    <div class="custom-model-wrap" id="custom-openai-wrap" style="display:none">
+                        <label>Custom OpenAI Model Name</label>
+                        <input type="text" id="cfg-openai-model-custom" />
+                    </div>
+                </div>
+                <div class="settings-row">
+                    <label>Base URL</label>
+                    <input type="text" id="cfg-openai-url" placeholder="https://api.openai.com/v1" />
+                </div>
+            </div>
+
+            <!-- Groq -->
+            <div class="settings-group" id="group-groq">
+                <div class="settings-row">
+                    <label>API Key</label>
+                    <input type="password" id="cfg-groq-key" />
+                </div>
+                <div class="settings-row">
+                    <label>Model</label>
+                    <select id="cfg-groq-model" onchange="onModelSelect('groq')">
+                        <option value="llama-3.3-70b-versatile">llama-3.3-70b-versatile</option>
+                        <option value="qwen-2.5-coder-32b">qwen-2.5-coder-32b</option>
+                        <option value="deepseek-v3">deepseek-v3</option>
+                        <option value="deepseek-r1">deepseek-r1</option>
+                        <option value="other">Other / Custom —></option>
+                    </select>
+                    <div class="custom-model-wrap" id="custom-groq-wrap" style="display:none">
+                        <label>Custom Groq Model Name</label>
+                        <input type="text" id="cfg-groq-model-custom" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Azure -->
+            <div class="settings-group" id="group-azure-openai">
+                <div class="settings-row">
+                    <label>API Key</label>
+                    <input type="password" id="cfg-azure-key" />
+                </div>
+                <div class="settings-row">
+                    <label>Endpoint</label>
+                    <input type="text" id="cfg-azure-endpoint" placeholder="https://resource.openai.azure.com" />
+                </div>
+                <div class="settings-row">
+                    <label>Deployment Name</label>
+                    <input type="text" id="cfg-azure-deployment" placeholder="e.g. gpt-4o-deployment" />
+                </div>
+                <div class="settings-row">
+                    <label>API Version</label>
+                    <select id="cfg-azure-version" onchange="onModelSelect('azure')">
+                        <option value="2024-08-01-preview">2024-08-01-preview</option>
+                        <option value="2024-05-01-preview">2024-05-01-preview</option>
+                        <option value="2024-02-01">2024-02-01</option>
+                        <option value="other">Other / Custom —></option>
+                    </select>
+                    <div class="custom-model-wrap" id="custom-azure-wrap" style="display:none">
+                        <label>Custom API Version</label>
+                        <input type="text" id="cfg-azure-version-custom" placeholder="e.g. 2024-10-01-preview" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- LiteLLM -->
+            <div class="settings-group" id="group-litellm">
+                <div class="settings-row">
+                    <label>Base URL</label>
+                    <input type="text" id="cfg-litellm-url" placeholder="http://localhost:4000/v1" />
+                </div>
+                <div class="settings-row">
+                    <label>Model ID</label>
+                    <input type="text" id="cfg-litellm-model" placeholder="gpt-4o" />
+                </div>
+                <div class="settings-row">
+                    <label>API Key (Optional)</label>
+                    <input type="password" id="cfg-litellm-key" />
+                </div>
+            </div>
+
+            <div class="settings-footer">
+                <button class="btn btn-secondary btn-full" onclick="backFromSettings()">Cancel</button>
+                <button class="btn btn-bp btn-full" onclick="saveSettings()">✓ Save Config</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const vscode = acquireVsCodeApi();
 
@@ -1310,6 +1464,7 @@
             { id: 6, name: 'Data', sub: 'Database Modeling', icon: '◈', agent: 'Data Agent' },
             { id: 7, name: 'Design', sub: 'UI/UX, Wow Factor & Animations', icon: '◇', agent: 'Design Agent' },
             { id: 8, name: 'Handoff', sub: 'One-Shot Master Prompt', icon: '⬟', agent: 'Handoff Agent' }
+            // { id: 9, name: 'Seeding', sub: 'Mock Data Generation (Optional)', icon: '🌿', agent: 'Seeding Agent' }
         ];
 
         let S = {
@@ -1344,6 +1499,7 @@
                 case 'error': toast(m.message, 'error'); break;
                 case 'toast': toast(m.text, m.variant); break;
                 case 'showSetup': show('screen-setup'); break;
+                case 'settingsOpen': openSettingsScreen(m.config); break;
             }
         });
 
@@ -1660,6 +1816,122 @@
             const t = document.createElement('div'); t.className = `toast ${v}`; t.textContent = text;
             s.appendChild(t);
             setTimeout(() => { t.style.transition = 'opacity .3s'; t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 3500);
+        }
+
+        function openSettingsScreen(config) {
+            S._prevScreen = document.querySelector('.screen.active').id;
+            // Set Provider
+            document.getElementById('cfg-provider').value = config.provider;
+            onProviderToggle();
+
+            // Set Gemini
+            document.getElementById('cfg-gemini-key').value = config.geminiApiKey || '';
+            const gBox = document.getElementById('cfg-gemini-model');
+            if ([...gBox.options].some(o => o.value === config.geminiModel)) {
+                gBox.value = config.geminiModel;
+                document.getElementById('custom-gemini-wrap').style.display = 'none';
+            } else {
+                gBox.value = 'other';
+                document.getElementById('custom-gemini-wrap').style.display = 'block';
+                document.getElementById('cfg-gemini-model-custom').value = config.geminiModel || '';
+            }
+
+            // Set OpenAI
+            document.getElementById('cfg-openai-key').value = config.openaiApiKey || '';
+            document.getElementById('cfg-openai-url').value = config.openaiBaseUrl || '';
+            const oBox = document.getElementById('cfg-openai-model');
+            if ([...oBox.options].some(o => o.value === config.openaiModel)) {
+                oBox.value = config.openaiModel;
+                document.getElementById('custom-openai-wrap').style.display = 'none';
+            } else {
+                oBox.value = 'other';
+                document.getElementById('custom-openai-wrap').style.display = 'block';
+                document.getElementById('cfg-openai-model-custom').value = config.openaiModel || '';
+            }
+
+            // Set Groq
+            document.getElementById('cfg-groq-key').value = config.groqApiKey || '';
+            const grBox = document.getElementById('cfg-groq-model');
+            if ([...grBox.options].some(o => o.value === config.groqModel)) {
+                grBox.value = config.groqModel;
+                document.getElementById('custom-groq-wrap').style.display = 'none';
+            } else {
+                grBox.value = 'other';
+                document.getElementById('custom-groq-wrap').style.display = 'block';
+                document.getElementById('cfg-groq-model-custom').value = config.groqModel || '';
+            }
+
+            // Set Azure
+            document.getElementById('cfg-azure-key').value = config.azureApiKey || '';
+            document.getElementById('cfg-azure-endpoint').value = config.azureEndpoint || '';
+            document.getElementById('cfg-azure-deployment').value = config.azureDeploymentName || '';
+            const aBox = document.getElementById('cfg-azure-version');
+            if ([...aBox.options].some(o => o.value === config.azureApiVersion)) {
+                aBox.value = config.azureApiVersion;
+                document.getElementById('custom-azure-wrap').style.display = 'none';
+            } else {
+                aBox.value = 'other';
+                document.getElementById('custom-azure-wrap').style.display = 'block';
+                document.getElementById('cfg-azure-version-custom').value = config.azureApiVersion || '';
+            }
+
+            // Set LiteLLM
+            document.getElementById('cfg-litellm-key').value = config.litellmApiKey || '';
+            document.getElementById('cfg-litellm-model').value = config.litellmModel || '';
+            document.getElementById('cfg-litellm-url').value = config.litellmBaseUrl || '';
+
+            show('screen-settings');
+        }
+
+        function onProviderToggle() {
+            const provider = document.getElementById('cfg-provider').value;
+            document.querySelectorAll('.settings-group').forEach(g => g.classList.remove('active'));
+            document.getElementById(`group-${provider}`)?.classList.add('active');
+        }
+
+        function onModelSelect(type) {
+            const select = document.getElementById(`cfg-${type}-model`) || document.getElementById(`cfg-${type}-version`);
+            const wrap = document.getElementById(`custom-${type}-wrap`);
+            if (select && wrap) {
+                wrap.style.display = select.value === 'other' ? 'block' : 'none';
+            }
+        }
+
+        function saveSettings() {
+            const provider = document.getElementById('cfg-provider').value;
+            const getModel = (type) => {
+                const s = document.getElementById(`cfg-${type}-model`);
+                return (s && s.value === 'other') ? document.getElementById(`cfg-${type}-model-custom`).value.trim() : s?.value;
+            };
+            const getVersion = (type) => {
+                const s = document.getElementById(`cfg-${type}-version`);
+                return (s && s.value === 'other') ? document.getElementById(`cfg-${type}-version-custom`).value.trim() : s?.value;
+            };
+
+            const config = {
+                provider,
+                geminiApiKey: document.getElementById('cfg-gemini-key').value.trim(),
+                geminiModel: getModel('gemini'),
+                openaiApiKey: document.getElementById('cfg-openai-key').value.trim(),
+                openaiModel: getModel('openai'),
+                openaiBaseUrl: document.getElementById('cfg-openai-url').value.trim(),
+                groqApiKey: document.getElementById('cfg-groq-key').value.trim(),
+                groqModel: getModel('groq'),
+                azureApiKey: document.getElementById('cfg-azure-key').value.trim(),
+                azureEndpoint: document.getElementById('cfg-azure-endpoint').value.trim(),
+                azureDeploymentName: document.getElementById('cfg-azure-deployment').value.trim(),
+                azureApiVersion: getVersion('azure'),
+                litellmApiKey: document.getElementById('cfg-litellm-key').value.trim(),
+                litellmModel: document.getElementById('cfg-litellm-model').value.trim(),
+                litellmBaseUrl: document.getElementById('cfg-litellm-url').value.trim(),
+            };
+
+            vscode.postMessage({ type: 'saveConfig', config });
+            backFromSettings();
+        }
+
+        function backFromSettings() {
+            show(S._prevScreen || (S.projectState ? 'screen-main' : 'screen-setup'));
         }
 
         vscode.postMessage({ type: 'ready' });

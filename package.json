@@ -100,13 +100,6 @@
         "blueprint.gemini.model": {
           "type": "string",
           "default": "gemini-3.1-flash",
-          "enum": [
-            "gemini-3.1-flash",
-            "gemini-3.1-pro",
-            "gemini-3-deep-think",
-            "gemini-1.5-pro",
-            "gemini-1.5-flash"
-          ],
           "markdownDescription": "Gemini model to use.\n\n- `gemini-3.1-flash` — **April 2026 Latest**: Ultra-fast, KV-caching optimized\n- `gemini-3.1-pro` — **Flagship**: Deepest understanding & reasoning\n- `gemini-3-deep-think` — Specialized for extremely complex logic\n- `gemini-1.5-pro` — High quality legacy stable",
           "order": 11
         },
@@ -119,13 +112,6 @@
         "blueprint.openai.model": {
           "type": "string",
           "default": "gpt-5.4",
-          "enum": [
-            "gpt-5.4",
-            "o4-mini",
-            "o3-pro",
-            "gpt-4o",
-            "gpt-4o-mini"
-          ],
           "markdownDescription": "OpenAI model to use.\n\n- `gpt-5.4` — **April 2026 Flagship**: Best quality\n- `o4-mini` — Fastest reasoning-focused model\n- `gpt-4o` — High quality legcy",
           "order": 21
         },
@@ -144,15 +130,6 @@
         "blueprint.groq.model": {
           "type": "string",
           "default": "llama-3.3-70b-versatile",
-          "enum": [
-            "llama-3.3-70b-versatile",
-            "llama-3.1-8b-instant",
-            "qwen-2.5-coder-32b",
-            "qwen-2.5-72b",
-            "deepseek-v3",
-            "deepseek-r1",
-            "mistral-saba-24b"
-          ],
           "markdownDescription": "Groq model to use.\n\n- `llama-3.3-70b-versatile` — Balanced speed/quality\n- `qwen-2.5-coder-32b` — **Top Tier Coding**: Recommended for Blueprint\n- `deepseek-v3` — High efficiency reasoning\n- `mistral-saba-24b` — Ultra-fast inference",
           "order": 31
         },
@@ -177,12 +154,6 @@
         "blueprint.azure.apiVersion": {
           "type": "string",
           "default": "2024-08-01-preview",
-          "enum": [
-            "2024-08-01-preview",
-            "2024-05-01-preview",
-            "2024-02-01",
-            "2023-12-01-preview"
-          ],
           "markdownDescription": "**Azure OpenAI API Version** — use the latest preview version for best features.",
           "order": 43
         },
