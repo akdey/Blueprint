@@ -21,7 +21,7 @@ export type AgentProgressCallback = (phase: number, status: string, content?: st
 
 // Context budgets per provider (in characters, based on free/standard tier TPM limits)
 const PROVIDER_CONTEXT_LIMITS: Record<string, number> = {
-    'groq': 128_000,     // ~32K tokens (Groq 2026 limits)
+    'groq': 30_000,      // ~8K tokens (Safe for Groq 12K TPM limit)
     'gemini': 2_000_000, // ~500K tokens (Gemini 1.5/3.1 window)
     'openai': 128_000,   // ~32K tokens (GPT-4o/5.4 window)
     'azure': 128_000,
@@ -77,14 +77,15 @@ export class AgentOrchestrator {
             }
         }
 
-        // Phases 1-3 are small enough to use verbatim context.
-        // Phases 4-8 use smart context budgeting with LLMLingua2 compression.
+        // Phase 1 has no prior context. 
+        // Phases 2-9 use smart context budgeting with LLMLingua2 compression
+        // to stay within provider-specific character/token limits.
         let context: string;
-        if (phaseId <= 3) {
-            context = this.stateManager.buildContext(phaseId);
+        if (phaseId === 1) {
+            context = this.stateManager.getStaticPrefix();
         } else {
             const providerName = this.client.getLabel().toLowerCase();
-            let maxChars = 128_000; 
+            let maxChars = 30_000; 
             for (const [key, limit] of Object.entries(PROVIDER_CONTEXT_LIMITS)) {
                 if (providerName.includes(key)) {
                     maxChars = limit;
