@@ -2,7 +2,7 @@
   "name": "blueprint",
   "displayName": "Blueprint: Idea to Build Brief",
   "description": "8 specialized AI agents that transform your app idea into a complete, annotated build brief — brand identity, API contracts, database schema, TDD strategy, UI spec, and a one-shot master prompt. Supports Gemini, OpenAI, Groq, and Azure OpenAI.",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "license": "SEE LICENSE IN LICENSE",
   "publisher": "blueprint-dev",
   "repository": {
@@ -107,8 +107,14 @@
             "gemini-1.5-pro",
             "other"
           ],
-          "markdownDescription": "Gemini model to use.\n\n- `gemini-3.1-flash` — **April 2026 Latest**: Ultra-fast, KV-caching optimized\n- `gemini-3.1-pro` — **Flagship**: Deepest understanding & reasoning\n- `gemini-3-deep-think` — Specialized for extremely complex logic\n- `gemini-1.5-pro` — High quality legacy stable",
+          "markdownDescription": "Gemini model to use.\n\n- `gemini-3.1-flash` — **April 2026 Latest**: Ultra-fast, KV-caching optimized\n- `gemini-3.1-pro` — **Flagship**: Deepest understanding & reasoning\n- `gemini-3-deep-think` — Specialized for extremely complex logic\n- `gemini-1.5-pro` — High quality legacy stable\n\n_If set to `other`, the value from `blueprint.gemini.customModel` will be used._",
           "order": 11
+        },
+        "blueprint.gemini.customModel": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "**Custom Gemini Model ID** — specify any model ID (e.g., `gemini-experimental`). _Only used if `blueprint.gemini.model` is set to `other`._",
+          "order": 12
         },
         "blueprint.openai.apiKey": {
           "type": "string",
@@ -125,8 +131,14 @@
             "gpt-4o",
             "other"
           ],
-          "markdownDescription": "OpenAI model to use.\n\n- `gpt-5.4` — **April 2026 Flagship**: Best quality\n- `o4-mini` — Fastest reasoning-focused model\n- `gpt-4o` — High quality legcy",
+          "markdownDescription": "OpenAI model to use.\n\n- `gpt-5.4` — **April 2026 Flagship**: Best quality\n- `o4-mini` — Fastest reasoning-focused model\n- `gpt-4o` — High quality legcy\n\n_If set to `other`, the value from `blueprint.openai.customModel` will be used._",
           "order": 21
+        },
+        "blueprint.openai.customModel": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "**Custom OpenAI Model Name** — specify any model name (e.g., `gpt-3.5-turbo-16k`). _Only used if `blueprint.openai.model` is set to `other`._",
+          "order": 22
         },
         "blueprint.openai.baseUrl": {
           "type": "string",
@@ -150,8 +162,14 @@
             "deepseek-r1",
             "other"
           ],
-          "markdownDescription": "Groq model to use.\n\n- `llama-3.3-70b-versatile` — Balanced speed/quality\n- `qwen-2.5-coder-32b` — **Top Tier Coding**: Recommended for Blueprint\n- `deepseek-v3` — High efficiency reasoning\n- `mistral-saba-24b` — Ultra-fast inference",
+          "markdownDescription": "Groq model to use.\n\n- `llama-3.3-70b-versatile` — Balanced speed/quality\n- `qwen-2.5-coder-32b` — **Top Tier Coding**: Recommended for Blueprint\n- `deepseek-v3` — High efficiency reasoning\n- `mistral-saba-24b` — Ultra-fast inference\n\n_If set to `other`, the value from `blueprint.groq.customModel` will be used._",
           "order": 31
+        },
+        "blueprint.groq.customModel": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "**Custom Groq Model Name** — specify any model name (e.g., `llama3-8b-8192`). _Only used if `blueprint.groq.model` is set to `other`._",
+          "order": 32
         },
         "blueprint.azure.apiKey": {
           "type": "string",
@@ -174,8 +192,20 @@
         "blueprint.azure.apiVersion": {
           "type": "string",
           "default": "2024-08-01-preview",
-          "markdownDescription": "**Azure OpenAI API Version** — use the latest preview version for best features.",
+          "enum": [
+            "2024-08-01-preview",
+            "2024-05-01-preview",
+            "2024-02-01",
+            "other"
+          ],
+          "markdownDescription": "**Azure OpenAI API Version** — use the latest preview version for best features.\n\n_If set to `other`, the value from `blueprint.azure.customApiVersion` will be used._",
           "order": 43
+        },
+        "blueprint.azure.customApiVersion": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "**Custom Azure API Version** — specify any API version string (e.g., `2024-10-01-preview`). _Only used if `blueprint.azure.apiVersion` is set to `other`._",
+          "order": 44
         },
         "blueprint.litellm.apiKey": {
           "type": "string",

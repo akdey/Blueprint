@@ -15,21 +15,26 @@ export interface LLMConfig {
     // Gemini
     geminiApiKey?: string;
     geminiModel?: string;
+    geminiCustomModel?: string;
     // OpenAI
     openaiApiKey?: string;
     openaiModel?: string;
+    openaiCustomModel?: string;
     openaiBaseUrl?: string;
     // Groq
     groqApiKey?: string;
     groqModel?: string;
+    groqCustomModel?: string;
     // Azure OpenAI
     azureApiKey?: string;
     azureEndpoint?: string;
     azureDeploymentName?: string;
     azureApiVersion?: string;
+    azureCustomApiVersion?: string;
     // LiteLLM
     litellmApiKey?: string;
     litellmModel?: string;
+    litellmCustomModel?: string;
     litellmBaseUrl?: string;
 }
 
@@ -46,30 +51,30 @@ export function createLLMClient(config: LLMConfig): LLMClient {
         case 'gemini':
             return new GeminiClient(
                 config.geminiApiKey || '',
-                config.geminiModel || 'gemini-2.0-flash'
+                config.geminiModel === 'other' ? (config.geminiCustomModel || '') : (config.geminiModel || 'gemini-3.1-flash')
             );
         case 'openai':
             return new OpenAIClient(
                 config.openaiApiKey || '',
-                config.openaiModel || 'gpt-4o',
+                config.openaiModel === 'other' ? (config.openaiCustomModel || '') : (config.openaiModel || 'gpt-5.4'),
                 config.openaiBaseUrl || 'https://api.openai.com/v1'
             );
         case 'groq':
             return new GroqClient(
                 config.groqApiKey || '',
-                config.groqModel || 'llama-3.3-70b-versatile'
+                config.groqModel === 'other' ? (config.groqCustomModel || '') : (config.groqModel || 'llama-3.3-70b-versatile')
             );
         case 'azure-openai':
             return new AzureOpenAIClient(
                 config.azureApiKey || '',
                 config.azureEndpoint || '',
                 config.azureDeploymentName || '',
-                config.azureApiVersion || '2024-08-01-preview'
+                config.azureApiVersion === 'other' ? (config.azureCustomApiVersion || '') : (config.azureApiVersion || '2024-08-01-preview')
             );
         case 'litellm':
             return new OpenAIClient(
                 config.litellmApiKey || 'sk-none',
-                config.litellmModel || 'gpt-4o',
+                config.litellmModel === 'other' ? (config.litellmCustomModel || '') : (config.litellmModel || 'gpt-4o'),
                 config.litellmBaseUrl || 'http://localhost:4000/v1'
             );
         default:

@@ -1852,52 +1852,43 @@
             }
             onProviderToggle();
 
-            const initDropdown = (type, val, isVersion = false) => {
+            const initDropdown = (type, val, customVal, isVersion = false) => {
                 const id = isVersion ? `cfg-${type}-version` : `cfg-${type}-model`;
                 const cId = isVersion ? `cfg-${type}-version-custom` : `cfg-${type}-model-custom`;
                 const wId = isVersion ? `custom-${type}-wrap` : `custom-${type}-wrap`;
                 const box = document.getElementById(id);
                 if (!box) return;
 
-                if (!val) {
-                    box.selectedIndex = 0;
-                    document.getElementById(wId).style.display = 'none';
-                    return;
-                }
-
-                if ([...box.options].some(o => o.value === val)) {
-                    box.value = val;
-                    document.getElementById(wId).style.display = 'none';
-                } else {
-                    box.value = 'other';
-                    document.getElementById(wId).style.display = 'block';
-                    document.getElementById(cId).value = val;
+                box.value = val || (isVersion ? '2024-08-01-preview' : [...box.options][0].value);
+                document.getElementById(wId).style.display = box.value === 'other' ? 'block' : 'none';
+                if (box.value === 'other') {
+                    document.getElementById(cId).value = customVal || '';
                 }
             };
 
             // Set Gemini
             document.getElementById('cfg-gemini-key').value = config.geminiApiKey || '';
-            initDropdown('gemini', config.geminiModel);
+            initDropdown('gemini', config.geminiModel, config.geminiCustomModel);
 
             // Set OpenAI
             document.getElementById('cfg-openai-key').value = config.openaiApiKey || '';
             document.getElementById('cfg-openai-url').value = config.openaiBaseUrl || '';
-            initDropdown('openai', config.openaiModel);
+            initDropdown('openai', config.openaiModel, config.openaiCustomModel);
 
             // Set Groq
             document.getElementById('cfg-groq-key').value = config.groqApiKey || '';
-            initDropdown('groq', config.groqModel);
+            initDropdown('groq', config.groqModel, config.groqCustomModel);
 
             // Set Azure
             document.getElementById('cfg-azure-key').value = config.azureApiKey || '';
             document.getElementById('cfg-azure-endpoint').value = config.azureEndpoint || '';
             document.getElementById('cfg-azure-deployment').value = config.azureDeploymentName || '';
-            initDropdown('azure', config.azureApiVersion, true);
+            initDropdown('azure', config.azureApiVersion, config.azureCustomApiVersion, true);
 
             // Set LiteLLM
             document.getElementById('cfg-litellm-key').value = config.litellmApiKey || '';
             document.getElementById('cfg-litellm-url').value = config.litellmBaseUrl || '';
-            initDropdown('litellm', config.litellmModel);
+            initDropdown('litellm', config.litellmModel, config.litellmCustomModel);
 
             show('screen-settings');
         }
@@ -1938,18 +1929,23 @@
             const config = {
                 provider,
                 geminiApiKey: document.getElementById('cfg-gemini-key').value.trim(),
-                geminiModel: getModel('gemini'),
+                geminiModel: document.getElementById('cfg-gemini-model').value,
+                geminiCustomModel: document.getElementById('cfg-gemini-model-custom').value.trim(),
                 openaiApiKey: document.getElementById('cfg-openai-key').value.trim(),
-                openaiModel: getModel('openai'),
+                openaiModel: document.getElementById('cfg-openai-model').value,
+                openaiCustomModel: document.getElementById('cfg-openai-model-custom').value.trim(),
                 openaiBaseUrl: document.getElementById('cfg-openai-url').value.trim(),
                 groqApiKey: document.getElementById('cfg-groq-key').value.trim(),
-                groqModel: getModel('groq'),
+                groqModel: document.getElementById('cfg-groq-model').value,
+                groqCustomModel: document.getElementById('cfg-groq-model-custom').value.trim(),
                 azureApiKey: document.getElementById('cfg-azure-key').value.trim(),
                 azureEndpoint: document.getElementById('cfg-azure-endpoint').value.trim(),
                 azureDeploymentName: document.getElementById('cfg-azure-deployment').value.trim(),
-                azureApiVersion: getVersion('azure'),
+                azureApiVersion: document.getElementById('cfg-azure-version').value,
+                azureCustomApiVersion: document.getElementById('cfg-azure-version-custom').value.trim(),
                 litellmApiKey: document.getElementById('cfg-litellm-key').value.trim(),
-                litellmModel: getModel('litellm'),
+                litellmModel: document.getElementById('cfg-litellm-model').value,
+                litellmCustomModel: document.getElementById('cfg-litellm-model-custom').value.trim(),
                 litellmBaseUrl: document.getElementById('cfg-litellm-url').value.trim(),
             };
 
