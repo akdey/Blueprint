@@ -47,8 +47,9 @@ export class BlueprintViewProvider implements vscode.WebviewViewProvider {
     private async _handle(m: any): Promise<void> {
         switch (m.type) {
             case 'ready': await this._sendInit(); break;
-            case 'openSettings': this._handleSendSettings(); break;
-            case 'saveConfig': await this._handleSaveConfig(m.config); break;
+            case 'openSettings': 
+                vscode.commands.executeCommand('workbench.action.openSettings', '@ext:blueprint-dev.blueprint');
+                break;
             case 'browseFile': await this._handleBrowseFile(m.target); break;
             case 'initProject': await this._handleInitProject(m); break;
             case 'confirmTechStack': await this._handleConfirmTechStack(m); break;
@@ -81,40 +82,6 @@ export class BlueprintViewProvider implements vscode.WebviewViewProvider {
             existingState: existing,
             config: cfg
         });
-    }
-
-    private _handleSendSettings(): void {
-        const cfg = this._getLLMConfig();
-        this._post({ type: 'settingsOpen', config: cfg });
-    }
-
-    private async _handleSaveConfig(cfg: LLMConfig): Promise<void> {
-        const c = vscode.workspace.getConfiguration('blueprint');
-        const updates = [
-            c.update('provider', cfg.provider, true),
-            c.update('gemini.apiKey', cfg.geminiApiKey, true),
-            c.update('gemini.model', cfg.geminiModel, true),
-            c.update('gemini.customModel', cfg.geminiCustomModel, true),
-            c.update('openai.apiKey', cfg.openaiApiKey, true),
-            c.update('openai.model', cfg.openaiModel, true),
-            c.update('openai.customModel', cfg.openaiCustomModel, true),
-            c.update('openai.baseUrl', cfg.openaiBaseUrl, true),
-            c.update('groq.apiKey', cfg.groqApiKey, true),
-            c.update('groq.model', cfg.groqModel, true),
-            c.update('groq.customModel', cfg.groqCustomModel, true),
-            c.update('azure.apiKey', cfg.azureApiKey, true),
-            c.update('azure.endpoint', cfg.azureEndpoint, true),
-            c.update('azure.deploymentName', cfg.azureDeploymentName, true),
-            c.update('azure.apiVersion', cfg.azureApiVersion, true),
-            c.update('azure.customApiVersion', cfg.azureCustomApiVersion, true),
-            c.update('litellm.apiKey', cfg.litellmApiKey, true),
-            c.update('litellm.model', cfg.litellmModel, true),
-            c.update('litellm.customModel', cfg.litellmCustomModel, true),
-            c.update('litellm.baseUrl', cfg.litellmBaseUrl, true),
-        ];
-        await Promise.all(updates);
-        this._post({ type: 'toast', text: '✓ Configuration saved!', variant: 'success' });
-        await this._sendInit();
     }
 
     private _getLLMConfig(): LLMConfig {
