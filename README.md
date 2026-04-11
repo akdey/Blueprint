@@ -32,8 +32,8 @@
 |---|---|---|
 | 🎯 | **Native Custom Models** | **Total Flexibility**: Every provider now has a dedicated "Custom Model ID" textbox in VS Code settings. No more rigid enum constraints. |
 | ⚙️ | **Simplified Setup** | The "Open Settings" button now redirects you directly to the native VS Code Settings editor, ensuring your configuration is always visible and secure. |
+| 🧠 | **Intelligence Engine** | **Manual Gemini KV Caching** + **LLMLingua2 Compression** now integrated for zero token fatigue across all 8 phases. |
 | 🔌 | **LiteLLM Dropdown** | LiteLLM is now a first-class citizen with its own curated model list and support for any custom local endpoint. |
-| 🧠 | **April 2026 Models** | Default support for Gemini 3.1 series, GPT-5.4, Qwen 3 series, and DeepSeek V3/R1. |
 
 ---
 
@@ -63,7 +63,7 @@ You open an AI chat and describe your idea. You get... a half-baked wireframe, a
 
 Blueprint runs **8 specialized AI agents** in sequence, each deeply focused on one layer of your application — from brand identity to database schema to the final one-shot build prompt. Every agent **reads every prior phase's approved output**, ensuring nothing is contradictory, nothing is forgotten.
 
-The result: a `08_handoff.md` file that contains **the complete blueprint of your application**. Ready to paste into Antigravity, Copilot, Claude, or hand to a developer. Optionally, run the 9th phase to generate mock data or RAG documents.
+The result: a `08_handoff.md` file that contains **the complete blueprint of your application**. Ready to paste into Antigravity, Copilot, Claude, or hand to a developer.
 
 ---
 
@@ -102,11 +102,20 @@ Blueprint's wizard is **context-aware** and **level-calibrated**:
 - **Build-Level Filtering**: Monoliths for prototypes, modular/microservices for production.
 - **Intelligent Recommendations**: Every choice includes a **justification** based on your app type.
 
-### 🧩 Configuration Flexibility (All-New in v0.4.0)
+### 🧠 The Intelligence Engine (Performance-First)
+Blueprint handles complex, recursive design work that simple AI chats cannot.
+- **Gemini KV Caching (Exclusive)**: Blueprint manually manages the **KV Cache** prefix (cachedContents API) for your project. This makes generations in later phases (like Database and UI) up to **10x faster** and virtually immune to context-length errors.
+- **Smart Compression (LLMLingua2)**: Before every agent run, Blueprint uses **LLMLingua2** (semantically-aware compression) to shrink previous phase artifacts by up to 50%. This allows you to fit 8 phases of deep context into tighter 128k token budgets (like Groq or OpenAI) without losing specialized depth.
+- **Static Prompting**: Our system prompts are architected with "Static Prefixes" to maximize the cache hit-rate of frontier provider edge nodes.
+
+---
+
+## 🧩 Configuration Flexibility
+
 Never be limited by a dropdown again.
 - **"Other" Mode**: Select "Other" in any model or version dropdown to activate a dedicated textbox.
 - **Universal IDs**: Input experimental Gemini models, tuned OpenAI models, or local LiteLLM model strings directly.
-- **Native Settings**: Everything is handled through the VS Code Settings UI for maximum stability and visibility.
+- **Native Settings**: Configuration is now integrated directly into the VS Code Settings UI for maximum stability.
 
 ---
 
