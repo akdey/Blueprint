@@ -48,7 +48,7 @@ export class BlueprintViewProvider implements vscode.WebviewViewProvider {
         switch (m.type) {
             case 'ready': await this._sendInit(); break;
             case 'openSettings': 
-                vscode.commands.executeCommand('workbench.action.openSettings', '@ext:blueprint-dev.blueprint');
+                vscode.commands.executeCommand('workbench.action.openSettings', '@ext:akdey.blueprint-idea-to-brief');
                 break;
             case 'browseFile': await this._handleBrowseFile(m.target); break;
             case 'initProject': await this._handleInitProject(m); break;

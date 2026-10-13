@@ -1,10 +1,11 @@
 {
-  "name": "blueprint",
+  "name": "blueprint-idea-to-brief",
   "displayName": "Blueprint: Idea to Build Brief",
+  "icon": "media/logo.png",
   "description": "8 specialized AI agents that transform your app idea into a complete, annotated build brief — brand identity, API contracts, database schema, TDD strategy, UI spec, and a one-shot master prompt. Supports Gemini, OpenAI, Groq, and Azure OpenAI.",
   "version": "0.4.0",
   "license": "SEE LICENSE IN LICENSE",
-  "publisher": "blueprint-dev",
+  "publisher": "akdey",
   "repository": {
     "type": "git",
     "url": "https://github.com/akdey/Blueprint"

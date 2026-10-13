@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Rich Blueprint Gradient -->
+    <linearGradient id="blueprintBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a52c7" />
+      <stop offset="50%" stop-color="#0844a8" />
+      <stop offset="100%" stop-color="#06327e" />
+    </linearGradient>
+
+    <!-- Subtle Blueprint Drafting Grid -->
+    <pattern id="blueprintGrid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M 32 0 L 0 0 0 32" fill="none" stroke="#ffffff" stroke-width="1" stroke-opacity="0.1" />
+    </pattern>
+
+    <!-- Outer Glow for Drafting Marks -->
+    <filter id="draftGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Base Squircle Container (Classic Blueprint Blue) -->
+  <rect x="24" y="24" width="464" height="464" rx="100" fill="url(#blueprintBg)" />
+
+  <!-- Blueprint Coordinate Grid -->
+  <rect x="24" y="24" width="464" height="464" rx="100" fill="url(#blueprintGrid)" />
+
+  <!-- Outer Architectural Margin Box (Classic Blueprint Framing) -->
+  <rect x="56" y="56" width="400" height="400" rx="68" fill="none" stroke="#ffffff" stroke-width="2" stroke-opacity="0.3" stroke-dasharray="8,6" />
+
+  <!-- Corner Drafting Crop Marks / Registration Crosshairs -->
+  <g stroke="#ffffff" stroke-width="2" stroke-opacity="0.45">
+    <!-- Top-Left -->
+    <path d="M 44 80 L 80 80 M 80 44 L 80 80" />
+    <!-- Top-Right -->
+    <path d="M 468 80 L 432 80 M 432 44 L 432 80" />
+    <!-- Bottom-Left -->
+    <path d="M 44 432 L 80 432 M 80 468 L 80 432" />
+    <!-- Bottom-Right -->
+    <path d="M 468 432 L 432 432 M 432 468 L 432 432" />
+  </g>
+
+  <!-- ICONIC BLUEPRINT "B" - Easy to remember, easy to draw -->
+  <g filter="url(#draftGlow)">
+    <!-- Architectural Guideline Extensions (Overshooting lines typical of blueprints) -->
+    <g stroke="#60a5fa" stroke-width="3" stroke-opacity="0.4">
+      <!-- Top overshoot line -->
+      <line x1="130" y1="130" x2="380" y2="130" stroke-dasharray="6,6" />
+      <!-- Middle divider overshoot line -->
+      <line x1="130" y1="256" x2="380" y2="256" stroke-dasharray="6,6" />
+      <!-- Bottom overshoot line -->
+      <line x1="130" y1="382" x2="380" y2="382" stroke-dasharray="6,6" />
+      <!-- Vertical spine overshoot line -->
+      <line x1="172" y1="90" x2="172" y2="422" stroke-dasharray="6,6" />
+    </g>
+
+    <!-- Core Structural "B" Skeleton -->
+    <!-- Solid White Architectural Beams -->
+    <!-- 1. Main Vertical Spine -->
+    <line x1="172" y1="130" x2="172" y2="382" stroke="#ffffff" stroke-width="28" stroke-linecap="round" />
+
+    <!-- 2. Top Arch Loop -->
+    <path d="M 172 130 L 260 130 C 315 130 335 155 335 193 C 335 231 315 256 260 256 L 172 256"
+          fill="none" stroke="#ffffff" stroke-width="28" stroke-linecap="round" stroke-linejoin="round" />
+
+    <!-- 3. Bottom Arch Loop -->
+    <path d="M 172 256 L 275 256 C 335 256 360 282 360 319 C 360 356 335 382 275 382 L 172 382"
+          fill="none" stroke="#ffffff" stroke-width="28" stroke-linecap="round" stroke-linejoin="round" />
+
+    <!-- Internal Architectural Drafting Markers Inside The "B" Loops -->
+    <!-- Top Loop Center Drafting Crosshair (+) -->
+    <g stroke="#93c5fd" stroke-width="3.5" stroke-linecap="round" opacity="0.9">
+      <line x1="240" y1="193" x2="266" y2="193" />
+      <line x1="253" y1="180" x2="253" y2="206" />
+      <circle cx="253" cy="193" r="14" fill="none" stroke="#93c5fd" stroke-width="2.5" stroke-dasharray="3,3" />
+    </g>
+
+    <!-- Bottom Loop Center Drafting Crosshair (+) -->
+    <g stroke="#93c5fd" stroke-width="3.5" stroke-linecap="round" opacity="0.9">
+      <line x1="248" y1="319" x2="278" y2="319" />
+      <line x1="263" y1="304" x2="263" y2="334" />
+      <circle cx="263" cy="319" r="16" fill="none" stroke="#93c5fd" stroke-width="2.5" stroke-dasharray="3,3" />
+    </g>
+
+    <!-- Corner 45-degree Technical Drafting Chamfer Accents -->
+    <line x1="172" y1="165" x2="207" y2="130" stroke="#93c5fd" stroke-width="4" stroke-linecap="round" />
+    <line x1="172" y1="347" x2="207" y2="382" stroke="#93c5fd" stroke-width="4" stroke-linecap="round" />
+  </g>
+</svg>

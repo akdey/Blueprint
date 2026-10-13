@@ -1,13 +1,15 @@
 <div align="center">
 
-# ⬟ Blueprint
+<img src="media/logo.png" width="160" alt="Blueprint: Idea to Build Brief Logo" />
+
+# ⬟ Blueprint: Idea to Build Brief
 
 ### *From idea to complete developer brief — in your VS Code sidebar.*
 
 **Blueprint is a VS Code extension that acts as a team of elite AI agents,** each specializing in one phase of software design. You describe your app, Blueprint runs 8 sequential agents, and you get a battle-checked, fully-commented, one-shot build brief that any developer or AI coding assistant can execute immediately.
 
 [![VS Code](https://img.shields.io/badge/VS%20Code-1.85+-blue?logo=visual-studio-code)](https://code.visualstudio.com/)
-[![Version](https://img.shields.io/badge/version-0.4.0-brightgreen)](https://github.com/akdey/Blueprint/raw/main/blueprint-0.4.0.vsix)
+[![Version](https://img.shields.io/badge/version-0.4.0-brightgreen)](https://github.com/akdey/Blueprint/raw/main/blueprint-idea-to-brief-0.4.0.vsix)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178c6?logo=typescript)](https://www.typescriptlang.org/)
 [![LLM Providers](https://img.shields.io/badge/LLM-Gemini%20%7C%20OpenAI%20%7C%20Groq%20%7C%20Azure%20%7C%20LiteLLM-orange)](https://openai.com)
 [![License](https://img.shields.io/badge/license-Proprietary-red)](LICENSE)
@@ -20,7 +22,7 @@
 
 **Get Blueprint running in 30 seconds:**
 
-1.  **Download the Extension**: [**Click here to download `blueprint-0.4.0.vsix`**](https://github.com/akdey/Blueprint/raw/main/blueprint-0.4.0.vsix)
+1.  **Download the Extension**: [**Click here to download `blueprint-idea-to-brief-0.4.0.vsix`**](https://github.com/akdey/Blueprint/raw/main/blueprint-idea-to-brief-0.4.0.vsix)
 2.  **Install in VS Code**: Open VS Code → Extensions (`Ctrl+Shift+X`) → Click the `...` in the top right → **Install from VSIX...** → Select the downloaded file.
 3.  **Activate**: Click the ⬟ icon in your Activity Bar.
 
